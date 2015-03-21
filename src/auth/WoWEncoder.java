@@ -26,9 +26,10 @@ public class WoWEncoder implements ProtocolEncoder {
 
 	@Override
 	public void encode(IoSession message, Object msg, ProtocolEncoderOutput out) throws Exception {
-		LOGGER.info(msg.getClass().getName());
 		if (msg instanceof byte[]) {
 			out.write(IoBuffer.wrap((byte[]) msg));
+		} else {
+			LOGGER.warn("Unrecognized Object: {}", msg.getClass().getName());
 		}
 	}
 }

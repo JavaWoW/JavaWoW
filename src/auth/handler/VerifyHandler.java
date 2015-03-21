@@ -11,7 +11,8 @@ public final class VerifyHandler implements BasicHandler {
 
 	@Override
 	public final void handlePacket(IoSession session, SeekableLittleEndianAccessor slea) {
-		// TODO Auto-generated method stub
+		// Step 2 of SRP6: We send s and B (B = kv + g^b)
 		LOGGER.info(slea.toString());
+		
 	}
 }
