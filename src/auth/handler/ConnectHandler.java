@@ -3,7 +3,7 @@ package auth.handler;
 import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
 import java.security.MessageDigest;
-import java.util.Arrays;
+import java.security.NoSuchAlgorithmException;
 
 import org.apache.mina.core.session.IoSession;
 import org.bouncycastle.crypto.agreement.srp.SRP6Server;
@@ -11,6 +11,7 @@ import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import util.BitTools;
 import util.RandomUtil;
 import data.input.SeekableLittleEndianAccessor;
 
@@ -41,18 +42,21 @@ public final class ConnectHandler implements BasicHandler {
 		session.setAttribute("I", username);
 		BigInteger s = RandomUtil.getRandomS();
 		MessageDigest sha1;
-		
+		try {
 			sha1 = MessageDigest.getInstance("SHA-1");
-		
-		BigInteger bi = RandomUtil.getRandomS();
-		byte[] s_ = bi.toByteArray();
-		byte[] s_le = new byte[s_.length - (s_.length % 2)]; // little endian format of s_ (reversed)
-		for (int i = (s_.length - 1), c = 0; i >= s_.length % 2; i--) {
-			s_le[c++] = s_[i];
+		} catch (NoSuchAlgorithmException e) {
+			throw new InternalError(e.getLocalizedMessage(), e);
 		}
-		sha1.update(s_le); // feed the salt into the digest
-		
-		
+		String sha_hash = "5cd955b4d6d32a31ae4dfb0f03527125a77ac38f"; // lolwtf
+		BigInteger p = new BigInteger(sha_hash, 16);
+		sha1.update(BitTools.toLEByteArray(s, 32)); // feed the salt into the digest (s)
+		sha1.update(BitTools.toLEByteArray(p, 20)); // feed the password hash into the digest (p)
+		// s = salt (random)
+		// I = username
+		// p = password hash (can we use BCrypt?)
+		// v = g^x mod N
+		// x = SHA1(s | p) [pipes denote concatenation]
+		BigInteger x = BitTools.toBigInteger(sha1.digest(), true);
 		BigInteger v = g.modPow(x, N); // x is the sha1 hash as a number
 		SRP6Server srp = new SRP6Server();
 		srp.init(N, g, v, new SHA1Digest(), RandomUtil.getSecureRandom());

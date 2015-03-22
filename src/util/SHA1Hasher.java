@@ -8,7 +8,6 @@ import java.util.Formatter;
 public final class SHA1Hasher {
 
 	public static void main(String[] args) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-		// TODO Auto-generated method stub
 		MessageDigest sha1 = MessageDigest.getInstance("SHA-1");
 		String digested = byteToHex(sha1.digest("lolwtf".getBytes()));
 		System.out.println(digested);
