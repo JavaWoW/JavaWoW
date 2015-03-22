@@ -17,7 +17,7 @@ public class WoWDecoder extends CumulativeProtocolDecoder {
 
 	@Override
 	protected final boolean doDecode(IoSession session, IoBuffer buf, ProtocolDecoderOutput out) throws Exception {
-		byte cmd = buf.get();
+		/*byte cmd = buf.get();
 		byte error = buf.get();
 		byte b1 = buf.get();
 		byte b2 = buf.get();
@@ -33,6 +33,11 @@ public class WoWDecoder extends CumulativeProtocolDecoder {
 			out.write(in);
 			return true;
 		}
-		return false;
+		return false;*/
+		int length = buf.remaining();
+		byte[] input = new byte[length];
+		buf.get(input, 0, length);
+		out.write(input);
+		return true;
 	}
 }

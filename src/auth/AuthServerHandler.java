@@ -30,14 +30,13 @@ public class AuthServerHandler extends IoHandlerAdapter {
 			return; // wtf
 		}
 		SeekableLittleEndianAccessor slea = new GenericSeekableLittleEndianAccessor(new SeekableByteArrayStream((byte[]) msg));
-		byte b;
-		switch (b = slea.readByte()) {
+		switch (slea.readByte()) {
 			case 0: {
 				new ConnectHandler().handlePacket(session, slea);
 				break;
 			}
 			default: {
-				LOGGER.info("Unhandled. Header: {}", b);
+				LOGGER.info("Unhandled Packet: {}", slea.toString());
 				break;
 			}
 		}

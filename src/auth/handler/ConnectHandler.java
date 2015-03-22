@@ -1,6 +1,7 @@
 package auth.handler;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -51,6 +52,7 @@ public final class ConnectHandler implements BasicHandler {
 		BigInteger p = new BigInteger(sha_hash, 16);
 		sha1.update(BitTools.toLEByteArray(s, 32)); // feed the salt into the digest (s)
 		sha1.update(BitTools.toLEByteArray(p, 20)); // feed the password hash into the digest (p)
+		// SRP6 Parameters:
 		// s = salt (random)
 		// I = username
 		// p = password hash (can we use BCrypt?)
@@ -60,11 +62,35 @@ public final class ConnectHandler implements BasicHandler {
 		BigInteger v = g.modPow(x, N); // x is the sha1 hash as a number
 		SRP6Server srp = new SRP6Server();
 		srp.init(N, g, v, new SHA1Digest(), RandomUtil.getSecureRandom());
+		BigInteger B = srp.generateServerCredentials();
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		baos.write(0); // AUTH_LOGON_CHALLENGE
 		baos.write(0); // ?
 		baos.write(0); // WOW_SUCCESS
-		// TODO Write more shit
-		session.write(new byte[] {0, 0, 0}); // accept the login
+		try {
+			baos.write(BitTools.toLEByteArray(B, 32));
+		} catch (IOException e) {
+			LOGGER.error(e.getLocalizedMessage(), e);
+		}
+		baos.write(1);
+		baos.write(g.byteValue());
+		baos.write(32);
+		try {
+			baos.write(BitTools.toLEByteArray(N, 32));
+		} catch (IOException e) {
+			LOGGER.error(e.getLocalizedMessage(), e);
+		}
+		try {
+			baos.write(BitTools.toLEByteArray(s, 32));
+		} catch (IOException e) {
+			LOGGER.error(e.getLocalizedMessage(), e);
+		}
+		try {
+			baos.write(new byte[16]);
+		} catch (IOException e) {
+			LOGGER.error(e.getLocalizedMessage(), e);
+		}
+		baos.write(0);
+		session.write(baos.toByteArray()); // accept the login
 	}
 }
