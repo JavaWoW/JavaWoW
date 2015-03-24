@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import auth.handler.LoginRequestHandler;
 import auth.handler.LoginVerifyHandler;
+import auth.handler.RealmListRequestHandler;
 import data.input.GenericSeekableLittleEndianAccessor;
 import data.input.SeekableByteArrayStream;
 import data.input.SeekableLittleEndianAccessor;
@@ -38,6 +39,10 @@ public final class AuthServerHandler extends IoHandlerAdapter {
 			}
 			case 1: {
 				new LoginVerifyHandler().handlePacket(session, slea);
+				break;
+			}
+			case 16: {
+				new RealmListRequestHandler().handlePacket(session, slea);
 				break;
 			}
 			default: {

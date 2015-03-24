@@ -1,7 +1,6 @@
 package auth.handler;
 
 import java.math.BigInteger;
-import java.util.Arrays;
 
 import org.apache.mina.core.session.IoSession;
 import org.bouncycastle.crypto.CryptoException;
@@ -13,11 +12,16 @@ import tools.srp.WoWSRP6Server;
 import data.input.SeekableLittleEndianAccessor;
 import data.output.LittleEndianWriterStream;
 
-public class LoginVerifyHandler implements BasicHandler {
+public final class LoginVerifyHandler implements BasicHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(LoginVerifyHandler.class);
 
 	@Override
-	public void handlePacket(IoSession session, SeekableLittleEndianAccessor slea) {
+	public final boolean hasValidState(IoSession session) {
+		return session.containsAttribute("srp");
+	}
+
+	@Override
+	public final void handlePacket(IoSession session, SeekableLittleEndianAccessor slea) {
 		// Step 3 : Client sends us A and M1
 		byte[] A_bytes = slea.read(32); // Little-endian format
 		byte[] M1_bytes = slea.read(20);
@@ -69,6 +73,5 @@ public class LoginVerifyHandler implements BasicHandler {
 		lews.writeShort(0); // ?
 		session.write(lews.toByteArray()); // send the packet
 		LOGGER.info("Packet Sent.");
-		LOGGER.info("Your Output: {}", Arrays.toString(BitTools.toByteArray(M2, 20)));
 	}
 }

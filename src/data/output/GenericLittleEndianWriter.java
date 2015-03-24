@@ -110,4 +110,10 @@ public class GenericLittleEndianWriter implements LittleEndianWriter {
 		bos.writeByte((byte) ((l >>> 48) & 0xFF));
 		bos.writeByte((byte) ((l >>> 56) & 0xFF));
 	}
+
+	@Override
+	public final void writeFloat(float f) {
+		int i = Float.floatToIntBits(f);
+		writeInt(i);
+	}
 }

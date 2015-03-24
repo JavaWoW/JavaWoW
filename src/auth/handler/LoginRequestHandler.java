@@ -15,11 +15,16 @@ import tools.srp.WoWSRP6VerifierGenerator;
 import data.input.SeekableLittleEndianAccessor;
 import data.output.LittleEndianWriterStream;
 
-public class LoginRequestHandler implements BasicHandler {
+public final class LoginRequestHandler implements BasicHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(LoginRequestHandler.class);
 	private static final BigInteger N = new BigInteger("894B645E89E1535BBDAD5B8B290650530801B18EBFBF5E8FAB3C82872A3E9BB7", 16);
 	private static final BigInteger g = BigInteger.valueOf(7);
 	private static final SRP6GroupParameters params = new SRP6GroupParameters(N, g);
+
+	@Override
+	public final boolean hasValidState(IoSession session) {
+		return !session.containsAttribute("srp"); // only if srp is not set
+	}
 
 	@Override
 	public final void handlePacket(IoSession session, SeekableLittleEndianAccessor slea) {

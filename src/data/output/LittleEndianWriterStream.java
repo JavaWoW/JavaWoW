@@ -8,7 +8,7 @@ import data.HexTool;
  * @author Jon
  *
  */
-public final class LittleEndianWriterStream extends GenericLittleEndianWriter {
+public class LittleEndianWriterStream extends GenericLittleEndianWriter {
 	private ByteArrayOutputStream baos;
 
 	public LittleEndianWriterStream() {
@@ -22,6 +22,10 @@ public final class LittleEndianWriterStream extends GenericLittleEndianWriter {
 
 	public final byte[] toByteArray() {
 		return baos.toByteArray();
+	}
+
+	public final int size() {
+		return baos.size();
 	}
 
 	@Override

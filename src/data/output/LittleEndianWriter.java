@@ -15,6 +15,7 @@ public interface LittleEndianWriter {
 	void writeInt(long i);
 	void writeShort(int s);
 	void writeLong(long l);
+	void writeFloat(float f);
 	void writeAsciiString(String s);
 	void writeAsciiString(String s, int max);
 	void writeNullTerminatedAsciiString(String s);
