@@ -64,7 +64,36 @@ public final class WoWSRP6Server extends SRP6Server {
 	}
 
 	private final BigInteger calculateS() {
-		return v.modPow(u, N).multiply(A).mod(N).modPow(b, N);
+		// XXX Might need to modify this method to have the code below
+		BigInteger S = v.modPow(u, N).multiply(A).mod(N).modPow(b, N);
+		/*// Take S and convert it into a little-endian byte array
+		byte[] S_le = BitTools.toLEByteArray(S, 32);
+		byte[] S_even_bytes = new byte[16];
+		byte[] S_odd_bytes = new byte[16];
+		// Read in the even-indexed bytes
+		for (int i = 0, c = 0; i < 32; i += 2) {
+			S_even_bytes[c++] = S_le[i];
+		}
+		for (int i = 1, c = 0; i < 32; i += 2) {
+			S_odd_bytes[c++] = S_le[i];
+		}
+		digest.update(S_even_bytes, 0, S_even_bytes.length);
+		byte[] S_even_digested_bytes = new byte[digest.getDigestSize()];
+		digest.doFinal(S_even_digested_bytes, 0);
+		digest.update(S_odd_bytes, 0, S_odd_bytes.length);
+		byte[] S_odd_digested_bytes = new byte[digest.getDigestSize()];
+		digest.doFinal(S_odd_digested_bytes, 0);
+		byte[] hashed = new byte[digest.getDigestSize() * 2];
+		// copy the even-indexed bytes in
+		for (int i = 0, c = 0; i < 40; i += 2) {
+			hashed[i] = S_even_digested_bytes[c++];
+		}
+		// copy the odd-indexed bytes in
+		for (int i = 1, c = 0; i < 40; i += 2) {
+			hashed[i] = S_odd_digested_bytes[c++];
+		}
+		return new BigInteger(1, hashed);*/
+		return S;
 	}
 
 	/**
@@ -86,8 +115,22 @@ public final class WoWSRP6Server extends SRP6Server {
 			this.M1 = clientM1;
 			return true;
 		}
-		System.out.println("Client: " + clientM1.toString(16));
-		System.out.println("Server: " + computedM1.toString(16));
 		return false;
+	}
+
+	/**
+	* Computes the server evidence message M2 using the previously verified values.
+	* To be called after successfully verifying the client evidence message M1.
+	* @return M2: the server side generated evidence message
+	* @throws CryptoException
+	*/
+	public final BigInteger calculateServerEvidenceMessage() throws CryptoException {
+		// Verify pre-requirements
+		if (this.A == null || this.M1 == null || this.S == null) {
+			throw new CryptoException("Impossible to compute M2: some data are missing from the previous operations (A,M1,S)");
+		}
+		// Compute the server evidence message 'M2'
+		this.M2 = WoWSRP6Util.calculateM2(digest, N, A, M1, S);
+		return M2;
 	}
 }

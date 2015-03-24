@@ -8,19 +8,19 @@ import data.HexTool;
  * @author Jon
  *
  */
-public final class MaplePacketLittleEndianWriter extends GenericLittleEndianWriter {
+public final class LittleEndianWriterStream extends GenericLittleEndianWriter {
 	private ByteArrayOutputStream baos;
 
-	public MaplePacketLittleEndianWriter() {
+	public LittleEndianWriterStream() {
 		this(32);
 	}
 
-	public MaplePacketLittleEndianWriter(int size) {
+	public LittleEndianWriterStream(int size) {
 		this.baos = new ByteArrayOutputStream(size);
 		setByteOutputStream(new ByteArrayOutputByteStream(baos));
 	}
 
-	public final byte[] getPacket() {
+	public final byte[] toByteArray() {
 		return baos.toByteArray();
 	}
 

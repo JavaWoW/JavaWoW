@@ -1,9 +1,6 @@
 package auth.handler;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.math.BigInteger;
-import java.util.Random;
 
 import org.apache.mina.core.session.IoSession;
 import org.bouncycastle.crypto.digests.SHA1Digest;
@@ -16,6 +13,7 @@ import tools.RandomUtil;
 import tools.srp.WoWSRP6Server;
 import tools.srp.WoWSRP6VerifierGenerator;
 import data.input.SeekableLittleEndianAccessor;
+import data.output.LittleEndianWriterStream;
 
 public class LoginRequestHandler implements BasicHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(LoginRequestHandler.class);
@@ -38,13 +36,12 @@ public class LoginRequestHandler implements BasicHandler {
 		slea.readInt(); // ?
 		slea.readInt(); // ip
 		int usernameLength = slea.readByte();
-		Random r = new Random(1337); // XXX Debug only
 		// Step 1 : Client sends us I
 		byte[] I = slea.read(usernameLength); // username
 		// Step 2 : Server responds with B, g, N, s
 		byte[] p = "lolwtf".toUpperCase().getBytes(); // p (kept secret throughout)
 		byte[] s = new byte[32]; // salt (s)
-		r.nextBytes(s);
+		RandomUtil.getSecureRandom().nextBytes(s);
 		WoWSRP6VerifierGenerator gen = new WoWSRP6VerifierGenerator();
 		gen.init(params, new SHA1Digest());
 		BigInteger v = gen.generateVerifier(s, I, p); // generate v
@@ -54,41 +51,20 @@ public class LoginRequestHandler implements BasicHandler {
 		session.setAttribute("srp", srp);
 		// Now we have B, g, N, s (send it here)
 		// Begin Packet Response:
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		baos.write(0); // AUTH_LOGON_CHALLENGE
-		baos.write(0); // ?
-		baos.write(0); // WOW_SUCCESS
-		try {
-			baos.write(BitTools.toLEByteArray(B, 32));
-		} catch (IOException e) {
-			LOGGER.error(e.getLocalizedMessage(), e);
-		}
-		baos.write(1);
-		try {
-			baos.write(g.toByteArray());
-		} catch (IOException e) {
-			LOGGER.error(e.getLocalizedMessage(), e);
-		}
+		LittleEndianWriterStream lews = new LittleEndianWriterStream();
+		lews.write(0); // AUTH_LOGON_CHALLENGE
+		lews.write(0); // ?
+		lews.write(0); // WOW_SUCCESS
+		lews.write(BitTools.toLEByteArray(B, 32));
+		lews.write(1);
+		lews.write(g.toByteArray());
 		byte[] N_bytes = BitTools.toLEByteArray(N, 32);
-		baos.write(N_bytes.length);
-		try {
-			baos.write(N_bytes);
-		} catch (IOException e) {
-			LOGGER.error(e.getLocalizedMessage(), e);
-		}
-//		LOGGER.info("N Length: {}", N_bytes.length);
-		try {
-			baos.write(s);
-		} catch (IOException e) {
-			LOGGER.error(e.getLocalizedMessage(), e);
-		}
-		try {
-			baos.write(new byte[16]);
-		} catch (IOException e) {
-			LOGGER.error(e.getLocalizedMessage(), e);
-		}
-		baos.write(0);
-		session.write(baos.toByteArray()); // send the packet
+		lews.write(N_bytes.length);
+		lews.write(N_bytes);
+		lews.write(s);
+		lews.write(new byte[16]);
+		lews.write(0);
+		session.write(lews.toByteArray()); // send the packet
 		LOGGER.info("Packet Sent.");
 	}
 }

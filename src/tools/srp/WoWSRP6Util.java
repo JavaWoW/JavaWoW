@@ -2,6 +2,7 @@ package tools.srp;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.Arrays;
 
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.Digest;
@@ -88,7 +89,6 @@ public final class WoWSRP6Util extends SRP6Util {
 		for (int i = 1, c = 0; i < 40; i += 2) {
 			hashed[i] = S_odd_digested_bytes[c++];
 		}
-		// Above this ^ is confirmed working
 		int padLength = (N.bitLength() + 7) / 8;
 		byte[] N_bytes = BitTools.reverse(getPadded(N, padLength));
 		digest.update(N_bytes, 0, N_bytes.length);
@@ -130,8 +130,42 @@ public final class WoWSRP6Util extends SRP6Util {
 	 * @param S The secret calculated by both sides
 	 * @return M2 The calculated server evidence message
 	 */
-	public static BigInteger calculateM2(Digest digest, BigInteger N, BigInteger A, BigInteger M1, BigInteger S){
-		BigInteger M2 = hashPaddedTriplet(digest,N,A,M1,S);
+	public static BigInteger calculateM2(Digest digest, BigInteger N, BigInteger A, BigInteger M1, BigInteger S) {
+		// Take S and convert it into a little-endian byte array
+		byte[] S_le = BitTools.toLEByteArray(S, 32);
+		byte[] S_even_bytes = new byte[16];
+		byte[] S_odd_bytes = new byte[16];
+		// Read in the even-indexed bytes
+		for (int i = 0, c = 0; i < 32; i += 2) {
+			S_even_bytes[c++] = S_le[i];
+		}
+		for (int i = 1, c = 0; i < 32; i += 2) {
+			S_odd_bytes[c++] = S_le[i];
+		}
+		digest.update(S_even_bytes, 0, S_even_bytes.length);
+		byte[] S_even_digested_bytes = new byte[digest.getDigestSize()];
+		digest.doFinal(S_even_digested_bytes, 0);
+		digest.update(S_odd_bytes, 0, S_odd_bytes.length);
+		byte[] S_odd_digested_bytes = new byte[digest.getDigestSize()];
+		digest.doFinal(S_odd_digested_bytes, 0);
+		byte[] hashed = new byte[digest.getDigestSize() * 2];
+		// copy the even-indexed bytes in
+		for (int i = 0, c = 0; i < 40; i += 2) {
+			hashed[i] = S_even_digested_bytes[c++];
+		}
+		// copy the odd-indexed bytes in
+		for (int i = 1, c = 0; i < 40; i += 2) {
+			hashed[i] = S_odd_digested_bytes[c++];
+		}
+		int padLength = (N.bitLength() + 7) / 8;
+		byte[] A_bytes = BitTools.reverse(getPadded(A, padLength));
+		byte[] M1_bytes = BigIntegers.asUnsignedByteArray(M1);
+		digest.update(A_bytes, 0, A_bytes.length); // A
+		digest.update(M1_bytes, 0, M1_bytes.length); // M1
+		digest.update(hashed, 0, hashed.length);
+		byte[] output = new byte[digest.getDigestSize()];
+		digest.doFinal(output, 0);
+		BigInteger M2 = new BigInteger(1, output);
 		return M2;
 	}
 
@@ -146,19 +180,6 @@ public final class WoWSRP6Util extends SRP6Util {
 		int padLength = (N.bitLength() + 7) / 8;
 		byte[] _S = getPadded(S,padLength);
 		digest.update(_S, 0, _S.length);
-		byte[] output = new byte[digest.getDigestSize()];
-		digest.doFinal(output, 0);
-		return new BigInteger(1, output);
-	}
-
-	private static BigInteger hashPaddedTriplet(Digest digest, BigInteger N, BigInteger n1, BigInteger n2, BigInteger n3){
-		int padLength = (N.bitLength() + 7) / 8;
-		byte[] n1_bytes = getPadded(n1, padLength);
-		byte[] n2_bytes = getPadded(n2, padLength);
-		byte[] n3_bytes = getPadded(n3, padLength);
-		digest.update(n1_bytes, 0, n1_bytes.length);
-		digest.update(n2_bytes, 0, n2_bytes.length);
-		digest.update(n3_bytes, 0, n3_bytes.length);
 		byte[] output = new byte[digest.getDigestSize()];
 		digest.doFinal(output, 0);
 		return new BigInteger(1, output);

@@ -6,6 +6,7 @@ import java.util.Scanner;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.buffer.SimpleBufferAllocator;
+import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.transport.socket.SocketAcceptor;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
@@ -53,6 +54,9 @@ public final class AuthServer {
 		while (sc.hasNextLine()) {
 			if (sc.nextLine().equalsIgnoreCase("q")) {
 				System.out.println("Shutting down...");
+				for (IoSession session : acceptor.getManagedSessions().values()) {
+					session.close(true);
+				}
 				acceptor.unbind();
 				acceptor.dispose(true);
 				break;
