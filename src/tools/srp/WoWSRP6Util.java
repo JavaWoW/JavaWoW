@@ -1,4 +1,4 @@
-package auth.handler;
+package tools.srp;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -8,7 +8,7 @@ import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.agreement.srp.SRP6Util;
 import org.bouncycastle.util.BigIntegers;
 
-import util.BitTools;
+import tools.BitTools;
 
 public final class WoWSRP6Util extends SRP6Util {
 	private WoWSRP6Util() {

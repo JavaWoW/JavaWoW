@@ -1,4 +1,4 @@
-package auth.handler;
+package tools.srp;
 
 import java.math.BigInteger;
 

@@ -12,7 +12,7 @@ import data.input.GenericSeekableLittleEndianAccessor;
 import data.input.SeekableByteArrayStream;
 import data.input.SeekableLittleEndianAccessor;
 
-public class AuthServerHandler extends IoHandlerAdapter {
+public final class AuthServerHandler extends IoHandlerAdapter {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AuthServerHandler.class);
 
 	@Override

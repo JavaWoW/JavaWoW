@@ -11,8 +11,10 @@ import org.bouncycastle.crypto.params.SRP6GroupParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import util.BitTools;
-import util.RandomUtil;
+import tools.BitTools;
+import tools.RandomUtil;
+import tools.srp.WoWSRP6Server;
+import tools.srp.WoWSRP6VerifierGenerator;
 import data.input.SeekableLittleEndianAccessor;
 
 public class LoginRequestHandler implements BasicHandler {

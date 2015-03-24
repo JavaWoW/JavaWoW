@@ -12,11 +12,14 @@ import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AuthServer {
+public final class AuthServer {
 	private static final int PORT = 3724;
 	private static final Logger LOGGER = LoggerFactory.getLogger(AuthServer.class);
 	private static final Scanner sc = new Scanner(System.in);
 	private static SocketAcceptor acceptor;
+
+	private AuthServer() {
+	}
 
 	public static final void main(String[] args) {
 		IoBuffer.setUseDirectBuffer(false);
