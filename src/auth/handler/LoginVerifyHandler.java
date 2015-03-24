@@ -25,7 +25,7 @@ public final class LoginVerifyHandler implements BasicHandler {
 		// Step 3 : Client sends us A and M1
 		byte[] A_bytes = slea.read(32); // Little-endian format
 		byte[] M1_bytes = slea.read(20);
-		byte[] crc_hash_bytes = slea.read(20);
+		slea.skip(20); // crc_hash
 		slea.readByte();
 		slea.readByte();
 		WoWSRP6Server srp = (WoWSRP6Server) session.getAttribute("srp");
@@ -35,9 +35,9 @@ public final class LoginVerifyHandler implements BasicHandler {
 			return;
 		}
 		BigInteger A = BitTools.toBigInteger(A_bytes, true);
-		BigInteger S;
+		//BigInteger S;
 		try {
-			S = srp.calculateSecret(A);
+			srp.calculateSecret(A);
 		} catch (CryptoException e) {
 			LOGGER.error(e.getLocalizedMessage(), e);
 			session.close(true);
@@ -52,7 +52,11 @@ public final class LoginVerifyHandler implements BasicHandler {
 			session.close(true);
 			return;
 		}
-		LOGGER.info("BC M match: {}", M1_match);
+		if (!M1_match) {
+			// Authentication Failure
+			LOGGER.warn("M1 did not match.");
+			return;
+		}
 		// Step 4 : Server responds with M2 (only if A and M1 checks out)
 		BigInteger M2;
 		try {
@@ -72,6 +76,5 @@ public final class LoginVerifyHandler implements BasicHandler {
 		lews.writeInt(0); // surveyId
 		lews.writeShort(0); // ?
 		session.write(lews.toByteArray()); // send the packet
-		LOGGER.info("Packet Sent.");
 	}
 }

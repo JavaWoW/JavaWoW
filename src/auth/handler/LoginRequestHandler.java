@@ -34,10 +34,10 @@ public final class LoginRequestHandler implements BasicHandler {
 		slea.readByte(); // minor version (3)
 		slea.readByte(); // patch version (5)
 		slea.readShort(); // build number (12340)
-		String processor = slea.readLENullTerminatedAsciiString();
+		String arch = slea.readLENullTerminatedAsciiString();
 		String os = slea.readLENullTerminatedAsciiString();
 		String lang = slea.readLEAsciiString(4);
-		LOGGER.info("Info. Proc: {} OS: {} Lang: {}", processor, os, lang);
+		LOGGER.info("Arch: {} OS: {} Lang: {}", arch, os, lang);
 		slea.readInt(); // ?
 		slea.readInt(); // ip
 		int usernameLength = slea.readByte();
@@ -70,6 +70,5 @@ public final class LoginRequestHandler implements BasicHandler {
 		lews.write(new byte[16]);
 		lews.write(0);
 		session.write(lews.toByteArray()); // send the packet
-		LOGGER.info("Packet Sent.");
 	}
 }

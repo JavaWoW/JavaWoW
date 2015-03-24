@@ -1,14 +1,12 @@
 package auth.handler;
 
 import org.apache.mina.core.session.IoSession;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import data.input.SeekableLittleEndianAccessor;
-import data.output.Packet;
+import data.output.LittleEndianWriterStream;
 
 public final class RealmListRequestHandler implements BasicHandler {
-	private static final Logger LOGGER = LoggerFactory.getLogger(RealmListRequestHandler.class);
+//	private static final Logger LOGGER = LoggerFactory.getLogger(RealmListRequestHandler.class);
 
 	@Override
 	public final boolean hasValidState(IoSession session) {
@@ -17,24 +15,35 @@ public final class RealmListRequestHandler implements BasicHandler {
 
 	@Override
 	public final void handlePacket(IoSession session, SeekableLittleEndianAccessor slea) {
-		// FIXME Realm packet is not working
-		Packet p = new Packet((byte) 0x10);
-		//lews.write(0x10); // header
-		//lews.writeShort(); // size of packet
-		p.writeInt(0); // ?
-		p.writeShort(1); // number of realms
-		// for each realm
-		p.write(0x2A); // icon
-		p.write(0); // locked
-		p.write(0); // color
-		p.writeNullTerminatedAsciiString("RealmNameTest"); // realm name
-		p.writeNullTerminatedAsciiString("localhost:1337"); // ip:port
-		p.writeInt(0); // float I think....for population
-		p.writeFloat(0); // number of characters
-		p.write(0); // timezone
-		p.write(0); // ?
+		LittleEndianWriterStream lews = new LittleEndianWriterStream();
+		lews.write(0x10); // header
+		lews.writeShort(77); // size of entire packet
+		lews.writeInt(0); // ?
+		lews.writeShort(2); // number of realms (byte or short?)
+		// realm #1
+		lews.write(0); // icon
+		lews.write(0); // locked
+		lews.write(0x02); // flags
+		lews.writeNullTerminatedAsciiString("Test Realm"); // realm name
+		lews.writeNullTerminatedAsciiString("127.0.0.1:8087"); // ip:port
+		lews.writeInt(0); // float I think....for population
+		lews.write(0); // number of characters
+		lews.write(1); // timezone
+		lews.write(0x2C); // realm id?
+		// realm #2
+		lews.write(1); // icon
+		lews.write(0); // locked
+		lews.write(0); // flags
+		lews.writeNullTerminatedAsciiString("JavaWoW");
+		lews.writeNullTerminatedAsciiString("127.0.0.1:8085");
+		lews.writeInt(0);
+		lews.write(0);
+		lews.write(1); // timezone
+		lews.write(1);
 		// end
-		session.write(p);
-		LOGGER.info("Packet Sent.");
+		lews.write(0x10);
+		lews.write(0);
+		session.write(lews.toByteArray());
+//		LOGGER.info("Packet Sent.");
 	}
 }

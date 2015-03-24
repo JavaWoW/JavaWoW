@@ -6,7 +6,7 @@ public final class BitTools {
 	private BitTools() {
 	}
 
-	public static final byte[] toByteArray(BigInteger bi) {
+	/*public static final byte[] toByteArray(BigInteger bi) {
 		// Remove the sign bit if it exists
 		byte[] bits = bi.toByteArray();
 		int length = (int) Math.ceil(bi.bitLength() / 8);
@@ -16,7 +16,7 @@ public final class BitTools {
 			ret[j++] = bits[i];
 		}
 		return ret;
-	}
+	}*/
 
 	public static final byte[] reverse(byte[] arr) {
 		byte[] ret = new byte[arr.length];
@@ -24,12 +24,6 @@ public final class BitTools {
 			ret[c++] = arr[i];
 		}
 		return ret;
-	}
-
-	public static final BigInteger reverse(BigInteger bi) {
-		byte[] b = bi.toByteArray();
-		b = reverse(b);
-		return new BigInteger(1, b);
 	}
 
 	/**
