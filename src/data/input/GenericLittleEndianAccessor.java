@@ -222,7 +222,7 @@ public class GenericLittleEndianAccessor implements LittleEndianAccessor {
 	 * @see net.project54.maplestory.tools.data.input.LittleEndianAccessor#getBytesRead()
 	 */
 	@Override
-	public final long getBytesRead() {
+	public final int getBytesRead() {
 		return bis.getBytesRead();
 	}
 
@@ -230,7 +230,7 @@ public class GenericLittleEndianAccessor implements LittleEndianAccessor {
 	 * @see net.project54.maplestory.tools.data.input.LittleEndianAccessor#available()
 	 */
 	@Override
-	public final long available() {
+	public final int available() {
 		return bis.available();
 	}
 

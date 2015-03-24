@@ -7,7 +7,7 @@ import org.apache.mina.filter.codec.ProtocolEncoderOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class WoWEncoder implements ProtocolEncoder {
+public final class WoWEncoder implements ProtocolEncoder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(WoWEncoder.class);
 	private static final WoWEncoder INSTANCE = new WoWEncoder();
 

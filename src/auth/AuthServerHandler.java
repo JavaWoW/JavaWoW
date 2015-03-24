@@ -6,7 +6,8 @@ import org.apache.mina.core.session.IoSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import auth.handler.ConnectHandler;
+import auth.handler.LoginRequestHandler;
+import auth.handler.LoginVerifyHandler;
 import data.input.GenericSeekableLittleEndianAccessor;
 import data.input.SeekableByteArrayStream;
 import data.input.SeekableLittleEndianAccessor;
@@ -32,7 +33,11 @@ public class AuthServerHandler extends IoHandlerAdapter {
 		SeekableLittleEndianAccessor slea = new GenericSeekableLittleEndianAccessor(new SeekableByteArrayStream((byte[]) msg));
 		switch (slea.readByte()) {
 			case 0: {
-				new ConnectHandler().handlePacket(session, slea);
+				new LoginRequestHandler().handlePacket(session, slea);
+				break;
+			}
+			case 1: {
+				new LoginVerifyHandler().handlePacket(session, slea);
 				break;
 			}
 			default: {

@@ -5,7 +5,7 @@ import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.CumulativeProtocolDecoder;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 
-public class WoWDecoder extends CumulativeProtocolDecoder {
+public final class WoWDecoder extends CumulativeProtocolDecoder {
 	private static final WoWDecoder INSTANCE = new WoWDecoder();
 
 	private WoWDecoder() {

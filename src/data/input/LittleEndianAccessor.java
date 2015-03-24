@@ -27,6 +27,6 @@ public interface LittleEndianAccessor {
 	String readLENullTerminatedAsciiString();
 	String readMapleAsciiString();
 	Point readPos();
-	long getBytesRead();
-	long available();
+	int getBytesRead();
+	int available();
 }

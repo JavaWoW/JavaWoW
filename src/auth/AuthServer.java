@@ -22,10 +22,10 @@ public class AuthServer {
 		IoBuffer.setUseDirectBuffer(false);
 		IoBuffer.setAllocator(new SimpleBufferAllocator());
 		acceptor = new NioSocketAcceptor();
-		acceptor.getFilterChain().addLast("codec", new ProtocolCodecFilter(WoWCodecFactory.getInstance()));
 		acceptor.getSessionConfig().setReuseAddress(true); // XXX For debug only
 		acceptor.getSessionConfig().setTcpNoDelay(true);
 		acceptor.setCloseOnDeactivation(true);
+		acceptor.getFilterChain().addLast("codec", new ProtocolCodecFilter(WoWCodecFactory.getInstance()));
 		acceptor.setHandler(new AuthServerHandler());
 		for (;;) {
 			try {
@@ -51,7 +51,7 @@ public class AuthServer {
 			if (sc.nextLine().equalsIgnoreCase("q")) {
 				System.out.println("Shutting down...");
 				acceptor.unbind();
-				acceptor.dispose();
+				acceptor.dispose(true);
 				break;
 			}
 		}
