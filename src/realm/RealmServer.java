@@ -1,4 +1,4 @@
-package auth;
+package realm;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -13,14 +13,13 @@ import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class AuthServer {
-	private static final int PORT = 3724;
-	private static final Logger LOGGER = LoggerFactory.getLogger(AuthServer.class);
+import auth.AuthCodecFactory;
+
+public class RealmServer {
+	private static final int PORT = 1119;
+	private static final Logger LOGGER = LoggerFactory.getLogger(RealmServer.class);
 	private static final Scanner sc = new Scanner(System.in);
 	private static SocketAcceptor acceptor;
-
-	private AuthServer() {
-	}
 
 	public static final void main(String[] args) {
 		IoBuffer.setUseDirectBuffer(false);
@@ -30,7 +29,7 @@ public final class AuthServer {
 		acceptor.getSessionConfig().setTcpNoDelay(true);
 		acceptor.setCloseOnDeactivation(true);
 		acceptor.getFilterChain().addLast("codec", new ProtocolCodecFilter(AuthCodecFactory.getInstance()));
-		acceptor.setHandler(new AuthServerHandler());
+		acceptor.setHandler(new RealmServerHandler());
 		for (;;) {
 			try {
 				acceptor.bind(new InetSocketAddress(PORT));
@@ -43,7 +42,7 @@ public final class AuthServer {
 				}
 			}
 		}
-		LOGGER.info("Auth Server listening on port {}.", PORT);
+		LOGGER.info("Realm Server listening on port {}.", PORT);
 		/*Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
 			public final void run() {

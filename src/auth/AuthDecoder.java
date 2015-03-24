@@ -5,13 +5,13 @@ import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.CumulativeProtocolDecoder;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 
-public final class WoWDecoder extends CumulativeProtocolDecoder {
-	private static final WoWDecoder INSTANCE = new WoWDecoder();
+final class AuthDecoder extends CumulativeProtocolDecoder {
+	private static final AuthDecoder INSTANCE = new AuthDecoder();
 
-	private WoWDecoder() {
+	private AuthDecoder() {
 	}
 
-	public static final WoWDecoder getInstance() {
+	public static final AuthDecoder getInstance() {
 		return INSTANCE;
 	}
 

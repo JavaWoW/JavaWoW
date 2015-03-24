@@ -35,7 +35,7 @@ public final class RealmListRequestHandler implements BasicHandler {
 		lews.write(0); // locked
 		lews.write(0); // flags
 		lews.writeNullTerminatedAsciiString("JavaWoW");
-		lews.writeNullTerminatedAsciiString("127.0.0.1:8085");
+		lews.writeNullTerminatedAsciiString("127.0.0.1:1119");
 		lews.writeInt(0);
 		lews.write(0);
 		lews.write(1); // timezone

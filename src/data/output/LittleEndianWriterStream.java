@@ -2,7 +2,7 @@ package data.output;
 
 import java.io.ByteArrayOutputStream;
 
-import data.HexTool;
+import tools.HexTool;
 
 /**
  * @author Jon

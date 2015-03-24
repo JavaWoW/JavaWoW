@@ -1,27 +1,27 @@
-package auth;
+package realm;
 
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFactory;
 import org.apache.mina.filter.codec.ProtocolDecoder;
 import org.apache.mina.filter.codec.ProtocolEncoder;
 
-public final class WoWCodecFactory implements ProtocolCodecFactory {
-	private static final WoWCodecFactory INSTANCE = new WoWCodecFactory();
+public final class RealmCodecFactory implements ProtocolCodecFactory {
+	private static final RealmCodecFactory INSTANCE = new RealmCodecFactory();
 
-	private WoWCodecFactory() {
+	private RealmCodecFactory() {
 	}
 
-	public static final WoWCodecFactory getInstance() {
+	public static final RealmCodecFactory getInstance() {
 		return INSTANCE;
 	}
 
 	@Override
 	public final ProtocolDecoder getDecoder(IoSession session) throws Exception {
-		return WoWDecoder.getInstance();
+		return RealmDecoder.getInstance();
 	}
 
 	@Override
 	public final ProtocolEncoder getEncoder(IoSession session) throws Exception {
-		return WoWEncoder.getInstance();
+		return RealmEncoder.getInstance();
 	}
 }

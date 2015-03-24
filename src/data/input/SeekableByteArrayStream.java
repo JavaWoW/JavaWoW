@@ -1,6 +1,6 @@
 package data.input;
 
-import data.HexTool;
+import tools.HexTool;
 
 /**
  * @author Jon

@@ -7,14 +7,14 @@ import org.apache.mina.filter.codec.ProtocolEncoderOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class WoWEncoder implements ProtocolEncoder {
-	private static final Logger LOGGER = LoggerFactory.getLogger(WoWEncoder.class);
-	private static final WoWEncoder INSTANCE = new WoWEncoder();
+final class AuthEncoder implements ProtocolEncoder {
+	private static final Logger LOGGER = LoggerFactory.getLogger(AuthEncoder.class);
+	private static final AuthEncoder INSTANCE = new AuthEncoder();
 
-	private WoWEncoder() {
+	private AuthEncoder() {
 	}
 
-	public static final WoWEncoder getInstance() {
+	public static final AuthEncoder getInstance() {
 		return INSTANCE;
 	}
 

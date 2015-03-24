@@ -1,4 +1,4 @@
-package auth;
+package realm;
 
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IdleStatus;
@@ -6,15 +6,12 @@ import org.apache.mina.core.session.IoSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import auth.handler.LoginRequestHandler;
-import auth.handler.LoginVerifyHandler;
-import auth.handler.RealmListRequestHandler;
 import data.input.GenericSeekableLittleEndianAccessor;
 import data.input.SeekableByteArrayStream;
 import data.input.SeekableLittleEndianAccessor;
 
-final class AuthServerHandler extends IoHandlerAdapter {
-	private static final Logger LOGGER = LoggerFactory.getLogger(AuthServerHandler.class);
+final class RealmServerHandler extends IoHandlerAdapter {
+	private static final Logger LOGGER = LoggerFactory.getLogger(RealmServerHandler.class);
 
 	@Override
 	public final void exceptionCaught(IoSession session, Throwable cause) throws Exception {
@@ -33,18 +30,6 @@ final class AuthServerHandler extends IoHandlerAdapter {
 		}
 		SeekableLittleEndianAccessor slea = new GenericSeekableLittleEndianAccessor(new SeekableByteArrayStream((byte[]) msg));
 		switch (slea.readByte()) {
-			case 0: {
-				new LoginRequestHandler().handlePacket(session, slea);
-				break;
-			}
-			case 1: {
-				new LoginVerifyHandler().handlePacket(session, slea);
-				break;
-			}
-			case 16: {
-				new RealmListRequestHandler().handlePacket(session, slea);
-				break;
-			}
 			default: {
 				LOGGER.info("Unhandled Packet: {}", slea.toString());
 				break;
@@ -73,12 +58,12 @@ final class AuthServerHandler extends IoHandlerAdapter {
 	@Override
 	public final void sessionIdle(IoSession session, IdleStatus status) throws Exception {
 		// TODO Auto-generated method stub
-
+		
 	}
 
 	@Override
 	public final void sessionOpened(IoSession session) throws Exception {
 		// TODO Auto-generated method stub
-
+		LOGGER.info("IoSession opened with {}.", session.getRemoteAddress());
 	}
 }
