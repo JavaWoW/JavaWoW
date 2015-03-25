@@ -1,7 +1,5 @@
 package realm;
 
-import java.math.BigInteger;
-import java.util.Arrays;
 import java.util.Random;
 
 import org.apache.mina.core.service.IoHandlerAdapter;
@@ -10,7 +8,6 @@ import org.apache.mina.core.session.IoSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import tools.BitTools;
 import tools.HexTool;
 import data.input.GenericSeekableLittleEndianAccessor;
 import data.input.SeekableByteArrayStream;
