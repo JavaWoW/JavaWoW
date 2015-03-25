@@ -5,7 +5,7 @@ import org.apache.mina.filter.codec.ProtocolCodecFactory;
 import org.apache.mina.filter.codec.ProtocolDecoder;
 import org.apache.mina.filter.codec.ProtocolEncoder;
 
-public final class AuthCodecFactory implements ProtocolCodecFactory {
+final class AuthCodecFactory implements ProtocolCodecFactory {
 	private static final AuthCodecFactory INSTANCE = new AuthCodecFactory();
 
 	private AuthCodecFactory() {

@@ -13,10 +13,8 @@ import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import auth.AuthCodecFactory;
-
 public class RealmServer {
-	private static final int PORT = 1119;
+	private static final int PORT = 1337;
 	private static final Logger LOGGER = LoggerFactory.getLogger(RealmServer.class);
 	private static final Scanner sc = new Scanner(System.in);
 	private static SocketAcceptor acceptor;
@@ -28,7 +26,7 @@ public class RealmServer {
 		acceptor.getSessionConfig().setReuseAddress(true); // XXX For debug only
 		acceptor.getSessionConfig().setTcpNoDelay(true);
 		acceptor.setCloseOnDeactivation(true);
-		acceptor.getFilterChain().addLast("codec", new ProtocolCodecFilter(AuthCodecFactory.getInstance()));
+		acceptor.getFilterChain().addLast("codec", new ProtocolCodecFilter(RealmCodecFactory.getInstance()));
 		acceptor.setHandler(new RealmServerHandler());
 		for (;;) {
 			try {

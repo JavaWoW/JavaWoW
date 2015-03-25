@@ -1,6 +1,5 @@
 package data.output;
 
-import java.awt.Point;
 import java.nio.charset.Charset;
 
 /**
@@ -31,8 +30,8 @@ public class GenericLittleEndianWriter implements LittleEndianWriter {
 
 	@Override
 	public final void write(byte[] b) {
-		for (int x = 0; x < b.length; x++) {
-			bos.writeByte(b[x]);
+		for (int i = 0; i < b.length; i++) {
+			bos.writeByte(b[i]);
 		}
 	}
 
@@ -70,33 +69,21 @@ public class GenericLittleEndianWriter implements LittleEndianWriter {
 
 	@Override
 	public final void writeAsciiString(String s) {
-		write(s.getBytes(ASCII));
+		this.write(s.getBytes(ASCII));
 	}
 
 	@Override
 	public final void writeAsciiString(String s, int max) {
-		write(s.getBytes(ASCII));
+		this.write(s.getBytes(ASCII));
 		for (int i = s.length(); i < max; i++) {
-			write(0);
+			this.write(0);
 		}
 	}
 
 	@Override
-	public final void writeMapleAsciiString(String s) {
-		writeShort((short) s.length());
-		writeAsciiString(s);
-	}
-
-	@Override
 	public final void writeNullTerminatedAsciiString(String s) {
-		writeAsciiString(s);
-		write(0);
-	}
-	
-	@Override
-	public final void writePos(Point s) {
-		writeShort(s.x);
-		writeShort(s.y);
+		this.writeAsciiString(s);
+		this.write(0);
 	}
 
 	@Override
@@ -114,6 +101,34 @@ public class GenericLittleEndianWriter implements LittleEndianWriter {
 	@Override
 	public final void writeFloat(float f) {
 		int i = Float.floatToIntBits(f);
-		writeInt(i);
+		this.writeInt(i);
+	}
+
+	@Override
+	public final void writeBEFloat(float f) {
+		int i = Float.floatToIntBits(f);
+		bos.writeByte((byte) ((i >>> 24) & 0xFF));
+		bos.writeByte((byte) ((i >>> 16) & 0xFF));
+		bos.writeByte((byte) ((i >>> 8) & 0xFF));
+		bos.writeByte((byte) (i & 0xFF));
+	}
+
+	@Override
+	public final void writeDouble(double d) {
+		long l = Double.doubleToLongBits(d);
+		this.writeLong(l);
+	}
+
+	@Override
+	public final void writeBEDouble(double d) {
+		long l = Double.doubleToLongBits(d);
+		bos.writeByte((byte) ((l >>> 56) & 0xFF));
+		bos.writeByte((byte) ((l >>> 48) & 0xFF));
+		bos.writeByte((byte) ((l >>> 40) & 0xFF));
+		bos.writeByte((byte) ((l >>> 32) & 0xFF));
+		bos.writeByte((byte) ((l >>> 24) & 0xFF));
+		bos.writeByte((byte) ((l >>> 16) & 0xFF));
+		bos.writeByte((byte) ((l >>> 8) & 0xFF));
+		bos.writeByte((byte) (l & 0xFF));
 	}
 }
