@@ -30,7 +30,7 @@ public final class AuthServer {
 		acceptor.getSessionConfig().setTcpNoDelay(true);
 		acceptor.setCloseOnDeactivation(true);
 		acceptor.getFilterChain().addLast("codec", new ProtocolCodecFilter(AuthCodecFactory.getInstance()));
-		acceptor.setHandler(new AuthServerHandler());
+		acceptor.setHandler(AuthServerHandler.getInstance());
 		for (;;) {
 			try {
 				acceptor.bind(new InetSocketAddress(PORT));

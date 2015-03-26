@@ -14,6 +14,14 @@ import data.output.LittleEndianWriterStream;
 
 public final class LoginVerifyHandler implements BasicHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(LoginVerifyHandler.class);
+	private static final LoginVerifyHandler INSTANCE = new LoginVerifyHandler();
+
+	private LoginVerifyHandler() {
+	}
+
+	public static final LoginVerifyHandler getInstance() {
+		return INSTANCE;
+	}
 
 	@Override
 	public final boolean hasValidState(IoSession session) {

@@ -7,6 +7,14 @@ import data.output.LittleEndianWriterStream;
 
 public final class RealmListRequestHandler implements BasicHandler {
 //	private static final Logger LOGGER = LoggerFactory.getLogger(RealmListRequestHandler.class);
+	private static final RealmListRequestHandler INSTANCE = new RealmListRequestHandler();
+
+	private RealmListRequestHandler() {
+	}
+
+	public static final RealmListRequestHandler getInstance() {
+		return INSTANCE;
+	}
 
 	@Override
 	public final boolean hasValidState(IoSession session) {
