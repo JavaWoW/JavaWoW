@@ -1,6 +1,5 @@
 package data.input;
 
-import java.awt.Point;
 import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
 
@@ -198,24 +197,6 @@ public class GenericLittleEndianAccessor implements LittleEndianAccessor {
 			chrBuf[n - x] = (char) buf[x];
 		}
 		return new String(chrBuf);
-	}
-
-	/**
-	 * @see net.project54.maplestory.tools.data.input.LittleEndianAccessor#readMapleAsciiString()
-	 */
-	@Override
-	public final String readMapleAsciiString() {
-		return readAsciiString(readShort());
-	}
-
-	/**
-	 * @see net.project54.maplestory.tools.data.input.LittleEndianAccessor#readPos()
-	 */
-	@Override
-	public final Point readPos() {
-		int x = readShort();
-		int y = readShort();
-		return new Point(x, y);
 	}
 
 	/**

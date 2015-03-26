@@ -1,6 +1,5 @@
 package data.input;
 
-import java.awt.Point;
 import java.math.BigInteger;
 
 /**
@@ -25,8 +24,6 @@ public interface LittleEndianAccessor {
 	String readLEAsciiString(int n);
 	String readNullTerminatedAsciiString();
 	String readLENullTerminatedAsciiString();
-	String readMapleAsciiString();
-	Point readPos();
 	int getBytesRead();
 	int available();
 }

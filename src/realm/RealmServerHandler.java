@@ -28,10 +28,6 @@ final class RealmServerHandler extends IoHandlerAdapter {
 
 	@Override
 	public final void messageReceived(IoSession session, Object msg) throws Exception {
-		if (!(msg instanceof byte[])) { // wtf
-			LOGGER.info("Received unknown object: {}", msg.getClass().getName());
-			return;
-		}
 		SeekableLittleEndianAccessor slea = new GenericSeekableLittleEndianAccessor(new SeekableByteArrayStream((byte[]) msg));
 		short header = slea.readShort();
 		switch (header) {
@@ -40,7 +36,6 @@ final class RealmServerHandler extends IoHandlerAdapter {
 				break;
 			}
 		}
-		//LOGGER.info("Received: {}", HexTool.toString((byte[]) msg));
 	}
 
 	@Override

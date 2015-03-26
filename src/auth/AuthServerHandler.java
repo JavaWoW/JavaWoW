@@ -28,9 +28,6 @@ final class AuthServerHandler extends IoHandlerAdapter {
 
 	@Override
 	public final void messageReceived(IoSession session, Object msg) throws Exception {
-		if (!(msg instanceof byte[])) {
-			return; // wtf
-		}
 		SeekableLittleEndianAccessor slea = new GenericSeekableLittleEndianAccessor(new SeekableByteArrayStream((byte[]) msg));
 		switch (slea.readByte()) {
 			case 0: {
