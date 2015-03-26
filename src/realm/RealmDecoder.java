@@ -15,29 +15,32 @@ final class RealmDecoder extends CumulativeProtocolDecoder {
 		return INSTANCE;
 	}
 
+	private static final class DecoderState {
+		private int packetLength = -1;
+	}
+
 	@Override
 	protected final boolean doDecode(IoSession session, IoBuffer buf, ProtocolDecoderOutput out) throws Exception {
-		/*byte cmd = buf.get();
-		byte error = buf.get();
-		byte b1 = buf.get();
-		byte b2 = buf.get();
-		short packetLength = (short) (b2 & 0xFF << 8 | b1 & 0xFF);
-		int length = buf.remaining();
-		if (packetLength >= length) {
-			byte[] in = new byte[packetLength + 4];
-			in[0] = cmd;
-			in[1] = error;
-			in[2] = b1;
-			in[3] = b2;
-			buf.get(in, 4, packetLength);
+		DecoderState decoderState = (DecoderState) session.getAttribute(DecoderState.class.getName());
+		if (decoderState == null) {
+			decoderState = new DecoderState();
+			session.setAttribute(DecoderState.class.getName(), decoderState);
+		}
+		if (buf.remaining() >= 2 && decoderState.packetLength == -1) {
+			// we received 
+			int packetLength = (buf.getShort() & 0xFFFF);
+			decoderState.packetLength = packetLength;
+		} else if (buf.remaining() < 2 && decoderState.packetLength == -1) {
+			// not enough data to decode
+			return false;
+		}
+		if (buf.remaining() >= decoderState.packetLength) {
+			byte[] in = new byte[decoderState.packetLength];
+			buf.get(in, 0, decoderState.packetLength);
+			decoderState.packetLength = -1;
 			out.write(in);
 			return true;
 		}
-		return false;*/
-		int length = buf.remaining();
-		byte[] input = new byte[length];
-		buf.get(input, 0, length);
-		out.write(input);
-		return true;
+		return false;
 	}
 }

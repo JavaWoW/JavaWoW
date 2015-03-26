@@ -8,7 +8,6 @@ import org.apache.mina.core.session.IoSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import tools.HexTool;
 import data.input.GenericSeekableLittleEndianAccessor;
 import data.input.SeekableByteArrayStream;
 import data.input.SeekableLittleEndianAccessor;
@@ -34,9 +33,10 @@ final class RealmServerHandler extends IoHandlerAdapter {
 			return;
 		}
 		SeekableLittleEndianAccessor slea = new GenericSeekableLittleEndianAccessor(new SeekableByteArrayStream((byte[]) msg));
-		switch (slea.readByte()) {
+		short header = slea.readShort();
+		switch (header) {
 			default: {
-				LOGGER.info("Unhandled Packet: {}", slea.toString());
+				LOGGER.info("Header [0x{}] Unhandled Packet: {}", Integer.toHexString(header), slea.toString());
 				break;
 			}
 		}
@@ -68,37 +68,18 @@ final class RealmServerHandler extends IoHandlerAdapter {
 
 	@Override
 	public final void sessionOpened(IoSession session) throws Exception {
-		// FIXME Realm connection is not working (probably this packet is wrong)
 		LOGGER.info("IoSession opened with {}.", session.getRemoteAddress());
 		// Send Authentication Challenge Packet:
 		LittleEndianWriterStream lews = new LittleEndianWriterStream();
 		lews.writeShort(0x01EC); // header
-		lews.writeInt(1);
+		lews.writeInt(1); // ?
 		Random r = new Random(1337);
-		lews.writeInt(r.nextInt()); // _authSeed
 		byte[] seed1 = new byte[16];
 		byte[] seed2 = new byte[16];
 		r.nextBytes(seed1);
 		r.nextBytes(seed2);
-		lews.write(seed1);
-		lews.write(seed2);
-		System.out.println(HexTool.toString(lews.toByteArray()));
+		lews.write(seed1); // ?
+		lews.write(seed2); // ?
 		session.write(lews.toByteArray());
-		/*
-		ec01 0100 0000 [header] [1 - int]
-		6507 a331 [_authSeed]
-		2f1c 55d3 d88b f890 [seed1]
-		9413 bdfd b09e b4cf
-		7f65 c574 a355 3d9e [seed2]
-		d72f 42f0 2eef cca6
-		*/
-		/*
-		EC01 0100 0000
-		8A28 F1A8
-		B893 8A2C 1F35 72B0
-		4C48 D5DF 5228 1EE2
-		11AD 73F7 7F97 04E6
-		7929 FFCF D796 B02C
-		*/
 	}
 }

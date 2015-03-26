@@ -50,7 +50,6 @@ final class AuthServerHandler extends IoHandlerAdapter {
 				break;
 			}
 		}
-		//LOGGER.info("Received: {}", HexTool.toString((byte[]) msg));
 	}
 
 	@Override

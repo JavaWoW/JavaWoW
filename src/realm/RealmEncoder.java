@@ -25,9 +25,15 @@ final class RealmEncoder implements ProtocolEncoder {
 	}
 
 	@Override
-	public void encode(IoSession message, Object msg, ProtocolEncoderOutput out) throws Exception {
+	public void encode(IoSession session, Object msg, ProtocolEncoderOutput out) throws Exception {
 		if (msg instanceof byte[]) {
-			out.write(IoBuffer.wrap((byte[]) msg));
+			byte[] packet = ((byte[]) msg);
+			int packetLength = packet.length;
+			byte[] newPacket = new byte[packetLength + 2];
+			newPacket[0] = (byte) ((packetLength >>> 8) & 0xFF);
+			newPacket[1] = (byte) (packetLength & 0xFF);
+			System.arraycopy(packet, 0, newPacket, 2, packetLength);
+			out.write(IoBuffer.wrap(newPacket));
 		} else {
 			LOGGER.warn("Unrecognized Object: {}", msg.getClass().getName());
 		}
