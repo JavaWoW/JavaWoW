@@ -25,10 +25,10 @@ public final class RealmVerifyHandler implements BasicHandler {
 
 	@Override
 	public final void handlePacket(IoSession session, SeekableLittleEndianAccessor slea) {
-		slea.readByte();
-		slea.readByte();
+		slea.readByte(); // ?
+		slea.readByte(); // ?
 		short buildNumber = slea.readShort(); // build number of the client
-		slea.skip(6);
+		slea.skip(6); // ?
 		String username = slea.readNullTerminatedAsciiString();
 		System.out.println("Build Number: " + buildNumber);
 		System.out.println("Username: " + username);
