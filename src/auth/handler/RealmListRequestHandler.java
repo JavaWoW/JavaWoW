@@ -2,6 +2,7 @@ package auth.handler;
 
 import org.apache.mina.core.session.IoSession;
 
+import tools.BasicHandler;
 import data.input.SeekableLittleEndianAccessor;
 import data.output.LittleEndianWriterStream;
 

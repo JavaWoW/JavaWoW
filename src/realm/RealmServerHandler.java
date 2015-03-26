@@ -1,5 +1,7 @@
 package realm;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 import org.apache.mina.core.service.IoHandlerAdapter;
@@ -8,6 +10,8 @@ import org.apache.mina.core.session.IoSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import realm.handler.RealmVerifyHandler;
+import tools.BasicHandler;
 import data.input.GenericSeekableLittleEndianAccessor;
 import data.input.SeekableByteArrayStream;
 import data.input.SeekableLittleEndianAccessor;
@@ -15,6 +19,19 @@ import data.output.LittleEndianWriterStream;
 
 final class RealmServerHandler extends IoHandlerAdapter {
 	private static final Logger LOGGER = LoggerFactory.getLogger(RealmServerHandler.class);
+	private static final RealmServerHandler INSTANCE = new RealmServerHandler();
+	private static final Map<Short, BasicHandler> handlers = new HashMap<Short, BasicHandler>();
+
+	static {
+		handlers.put((short) 0x1ED, RealmVerifyHandler.getInstance());
+	}
+
+	private RealmServerHandler() {
+	}
+
+	public static final RealmServerHandler getInstance() {
+		return INSTANCE;
+	}
 
 	@Override
 	public final void exceptionCaught(IoSession session, Throwable cause) throws Exception {
@@ -30,11 +47,15 @@ final class RealmServerHandler extends IoHandlerAdapter {
 	public final void messageReceived(IoSession session, Object msg) throws Exception {
 		SeekableLittleEndianAccessor slea = new GenericSeekableLittleEndianAccessor(new SeekableByteArrayStream((byte[]) msg));
 		short header = slea.readShort();
-		switch (header) {
-			default: {
-				LOGGER.info("Header [0x{}] Unhandled Packet: {}", Integer.toHexString(header), slea.toString());
-				break;
+		BasicHandler handler = handlers.get(header);
+		if (handler != null) {
+			if (handler.hasValidState(session)) {
+				handler.handlePacket(session, slea);
+			} else {
+				LOGGER.warn("Invalid state detected for handler: {}", handler.getClass().getName());
 			}
+		} else {
+			LOGGER.warn("Unhandled Packet. Header: 0x{}", Integer.toHexString(header));
 		}
 	}
 

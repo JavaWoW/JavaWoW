@@ -27,7 +27,7 @@ public class RealmServer {
 		acceptor.getSessionConfig().setTcpNoDelay(true);
 		acceptor.setCloseOnDeactivation(true);
 		acceptor.getFilterChain().addLast("codec", new ProtocolCodecFilter(RealmCodecFactory.getInstance()));
-		acceptor.setHandler(new RealmServerHandler());
+		acceptor.setHandler(RealmServerHandler.getInstance());
 		for (;;) {
 			try {
 				acceptor.bind(new InetSocketAddress(PORT));

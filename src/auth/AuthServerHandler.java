@@ -9,7 +9,7 @@ import org.apache.mina.core.session.IoSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import auth.handler.BasicHandler;
+import tools.BasicHandler;
 import auth.handler.LoginRequestHandler;
 import auth.handler.LoginVerifyHandler;
 import auth.handler.RealmListRequestHandler;
@@ -50,10 +50,14 @@ final class AuthServerHandler extends IoHandlerAdapter {
 		SeekableLittleEndianAccessor slea = new GenericSeekableLittleEndianAccessor(new SeekableByteArrayStream((byte[]) msg));
 		byte header = slea.readByte();
 		BasicHandler handler = handlers.get(header);
-		if (handler.hasValidState(session)) {
-			handler.handlePacket(session, slea);
+		if (handler != null) {
+			if (handler.hasValidState(session)) {
+				handler.handlePacket(session, slea);
+			} else {
+				LOGGER.warn("Invalid state detected for handler: {}", handler.getClass().getName());
+			}
 		} else {
-			LOGGER.warn("Invalid state detected for handler: {}", handler.getClass().getName());
+			LOGGER.warn("Unhandled Packet. Header: 0x{}", Integer.toHexString(header));
 		}
 	}
 

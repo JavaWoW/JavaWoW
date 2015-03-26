@@ -7,6 +7,7 @@ import org.bouncycastle.crypto.CryptoException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import tools.BasicHandler;
 import tools.BitTools;
 import tools.srp.WoWSRP6Server;
 import data.input.SeekableLittleEndianAccessor;

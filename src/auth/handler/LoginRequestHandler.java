@@ -8,6 +8,7 @@ import org.bouncycastle.crypto.params.SRP6GroupParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import tools.BasicHandler;
 import tools.BitTools;
 import tools.RandomUtil;
 import tools.srp.WoWSRP6Server;
