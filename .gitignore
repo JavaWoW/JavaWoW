@@ -18,3 +18,4 @@ bin/
 ehthumbs.db
 Thumbs.db
 
+/target/
