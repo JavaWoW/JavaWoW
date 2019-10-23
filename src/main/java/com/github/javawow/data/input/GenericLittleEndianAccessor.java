@@ -15,7 +15,7 @@ public class GenericLittleEndianAccessor implements LittleEndianAccessor {
 	}
 
 	/**
-	 * @see net.project54.maplestory.tools.data.input.LittleEndianAccessor#readByte()
+	 * @see com.github.javawow.data.input.LittleEndianAccessor#readByte()
 	 */
 	@Override
 	public final byte readByte() {
@@ -23,7 +23,7 @@ public class GenericLittleEndianAccessor implements LittleEndianAccessor {
 	}
 
 	/**
-	 * @see net.project54.maplestory.tools.data.input.LittleEndianAccessor#readUnsignedByte()
+	 * @see com.github.javawow.data.input.LittleEndianAccessor#readUnsignedByte()
 	 */
 	@Override
 	public short readUnsignedByte() {
@@ -31,7 +31,7 @@ public class GenericLittleEndianAccessor implements LittleEndianAccessor {
 	}
 
 	/**
-	 * @see net.project54.maplestory.tools.data.input.LittleEndianAccessor#readChar()
+	 * @see com.github.javawow.data.input.LittleEndianAccessor#readChar()
 	 */
 	@Override
 	public final char readChar() {
@@ -39,7 +39,7 @@ public class GenericLittleEndianAccessor implements LittleEndianAccessor {
 	}
 
 	/**
-	 * @see net.project54.maplestory.tools.data.input.LittleEndianAccessor#readShort()
+	 * @see com.github.javawow.data.input.LittleEndianAccessor#readShort()
 	 */
 	@Override
 	public final short readShort() {
@@ -49,7 +49,7 @@ public class GenericLittleEndianAccessor implements LittleEndianAccessor {
 	}
 
 	/**
-	 * @see net.project54.maplestory.tools.data.input.LittleEndianAccessor#readUnsignedShort()
+	 * @see com.github.javawow.data.input.LittleEndianAccessor#readUnsignedShort()
 	 */
 	@Override
 	public int readUnsignedShort() {
@@ -57,7 +57,7 @@ public class GenericLittleEndianAccessor implements LittleEndianAccessor {
 	}
 
 	/**
-	 * @see net.project54.maplestory.tools.data.input.LittleEndianAccessor#readInt()
+	 * @see com.github.javawow.data.input.LittleEndianAccessor#readInt()
 	 */
 	@Override
 	public final int readInt() {
@@ -69,7 +69,7 @@ public class GenericLittleEndianAccessor implements LittleEndianAccessor {
 	}
 
 	/**
-	 * @see net.project54.maplestory.tools.data.input.LittleEndianAccessor#readUnsignedInt()
+	 * @see com.github.javawow.data.input.LittleEndianAccessor#readUnsignedInt()
 	 */
 	@Override
 	public final long readUnsignedInt() {
@@ -77,7 +77,7 @@ public class GenericLittleEndianAccessor implements LittleEndianAccessor {
 	}
 
 	/**
-	 * @see net.project54.maplestory.tools.data.input.LittleEndianAccessor#readLong()
+	 * @see com.github.javawow.data.input.LittleEndianAccessor#readLong()
 	 */
 	@Override
 	public final long readLong() {
@@ -93,7 +93,7 @@ public class GenericLittleEndianAccessor implements LittleEndianAccessor {
 	}
 
 	/**
-	 * @see net.project54.maplestory.tools.data.input.LittleEndianAccessor#readUnsignedLong()
+	 * @see com.github.javawow.data.input.LittleEndianAccessor#readUnsignedLong()
 	 */
 	@Override
 	public BigInteger readUnsignedLong() {
@@ -102,7 +102,7 @@ public class GenericLittleEndianAccessor implements LittleEndianAccessor {
 	}
 
 	/**
-	 * @see net.project54.maplestory.tools.data.input.LittleEndianAccessor#skip(int)
+	 * @see com.github.javawow.data.input.LittleEndianAccessor#skip(int)
 	 */
 	@Override
 	public void skip(int num) {
@@ -112,7 +112,7 @@ public class GenericLittleEndianAccessor implements LittleEndianAccessor {
 	}
 
 	/**
-	 * @see net.project54.maplestory.tools.data.input.LittleEndianAccessor#read(int)
+	 * @see com.github.javawow.data.input.LittleEndianAccessor#read(int)
 	 */
 	@Override
 	public final byte[] read(int num) {
@@ -124,7 +124,7 @@ public class GenericLittleEndianAccessor implements LittleEndianAccessor {
 	}
 
 	/**
-	 * @see net.project54.maplestory.tools.data.input.LittleEndianAccessor#readFloat()
+	 * @see com.github.javawow.data.input.LittleEndianAccessor#readFloat()
 	 */
 	@Override
 	public final float readFloat() {
@@ -132,7 +132,7 @@ public class GenericLittleEndianAccessor implements LittleEndianAccessor {
 	}
 
 	/**
-	 * @see net.project54.maplestory.tools.data.input.LittleEndianAccessor#readDouble()
+	 * @see com.github.javawow.data.input.LittleEndianAccessor#readDouble()
 	 */
 	@Override
 	public final double readDouble() {
@@ -140,7 +140,7 @@ public class GenericLittleEndianAccessor implements LittleEndianAccessor {
 	}
 
 	/**
-	 * @see net.project54.maplestory.tools.data.input.LittleEndianAccessor#readAsciiString(int)
+	 * @see com.github.javawow.data.input.LittleEndianAccessor#readAsciiString(int)
 	 */
 	@Override
 	public final String readAsciiString(int n) {
@@ -152,7 +152,7 @@ public class GenericLittleEndianAccessor implements LittleEndianAccessor {
 	}
 
 	/**
-	 * @see net.project54.maplestory.tools.data.input.LittleEndianAccessor#readAsciiString(int)
+	 * @see com.github.javawow.data.input.LittleEndianAccessor#readAsciiString(int)
 	 */
 	@Override
 	public final String readLEAsciiString(int length) {
@@ -164,7 +164,7 @@ public class GenericLittleEndianAccessor implements LittleEndianAccessor {
 	}
 
 	/**
-	 * @see net.project54.maplestory.tools.data.input.LittleEndianAccessor#readNullTerminatedAsciiString()
+	 * @see com.github.javawow.data.input.LittleEndianAccessor#readNullTerminatedAsciiString()
 	 */
 	@Override
 	public final String readNullTerminatedAsciiString() {
@@ -182,7 +182,7 @@ public class GenericLittleEndianAccessor implements LittleEndianAccessor {
 	}
 
 	/**
-	 * @see net.project54.maplestory.tools.data.input.LittleEndianAccessor#readNullTerminatedAsciiString()
+	 * @see com.github.javawow.data.input.LittleEndianAccessor#readNullTerminatedAsciiString()
 	 */
 	@Override
 	public final String readLENullTerminatedAsciiString() {
@@ -200,7 +200,7 @@ public class GenericLittleEndianAccessor implements LittleEndianAccessor {
 	}
 
 	/**
-	 * @see net.project54.maplestory.tools.data.input.LittleEndianAccessor#getBytesRead()
+	 * @see com.github.javawow.data.input.LittleEndianAccessor#getBytesRead()
 	 */
 	@Override
 	public final int getBytesRead() {
@@ -208,7 +208,7 @@ public class GenericLittleEndianAccessor implements LittleEndianAccessor {
 	}
 
 	/**
-	 * @see net.project54.maplestory.tools.data.input.LittleEndianAccessor#available()
+	 * @see com.github.javawow.data.input.LittleEndianAccessor#available()
 	 */
 	@Override
 	public final int available() {

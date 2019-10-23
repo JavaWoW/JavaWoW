@@ -8,7 +8,7 @@ public final class GenericSeekableLittleEndianAccessor extends GenericLittleEndi
 	private SeekableByteInputStream sbis;
 
 	/**
-	 * @param bis
+	 * @param sbis
 	 */
 	public GenericSeekableLittleEndianAccessor(SeekableByteInputStream sbis) {
 		super(sbis);
@@ -16,7 +16,7 @@ public final class GenericSeekableLittleEndianAccessor extends GenericLittleEndi
 	}
 
 	/**
-	 * @see net.project54.maplestory.tools.data.input.SeekableLittleEndianAccessor#seek(int)
+	 * @see com.github.javawow.data.input.SeekableLittleEndianAccessor#seek(int)
 	 */
 	@Override
 	public final void seek(int offset) {
@@ -24,7 +24,7 @@ public final class GenericSeekableLittleEndianAccessor extends GenericLittleEndi
 	}
 
 	/**
-	 * @see net.project54.maplestory.tools.data.input.GenericLittleEndianAccessor#seek(int)
+	 * @see com.github.javawow.data.input.SeekableLittleEndianAccessor#seek(int)
 	 */
 	@Override
 	public final void skip(int num) {
@@ -32,7 +32,7 @@ public final class GenericSeekableLittleEndianAccessor extends GenericLittleEndi
 	}
 
 	/**
-	 * @see net.project54.maplestory.tools.data.input.SeekableLittleEndianAccessor#getPosition()
+	 * @see com.github.javawow.data.input.SeekableLittleEndianAccessor#getPosition()
 	 */
 	@Override
 	public final int getPosition() {

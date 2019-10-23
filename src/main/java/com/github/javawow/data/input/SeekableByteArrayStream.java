@@ -16,7 +16,7 @@ public final class SeekableByteArrayStream implements SeekableByteInputStream {
 	}
 
 	/**
-	 * @see net.project54.maplestory.tools.data.input.ByteInputStream#readByte()
+	 * @see com.github.javawow.data.input.ByteInputStream#readByte()
 	 */
 	@Override
 	public final int readByte() {
@@ -25,7 +25,7 @@ public final class SeekableByteArrayStream implements SeekableByteInputStream {
 	}
 
 	/**
-	 * @see net.project54.maplestory.tools.data.input.ByteInputStream#getBytesRead()
+	 * @see com.github.javawow.data.input.ByteInputStream#getBytesRead()
 	 */
 	@Override
 	public final int getBytesRead() {
@@ -33,7 +33,7 @@ public final class SeekableByteArrayStream implements SeekableByteInputStream {
 	}
 
 	/**
-	 * @see net.project54.maplestory.tools.data.input.ByteInputStream#available()
+	 * @see com.github.javawow.data.input.ByteInputStream#available()
 	 */
 	@Override
 	public final int available() {
@@ -41,7 +41,7 @@ public final class SeekableByteArrayStream implements SeekableByteInputStream {
 	}
 
 	/**
-	 * @see net.project54.maplestory.tools.data.input.SeekableInputStreamByteStream#seek(long)
+	 * @see com.github.javawow.data.input.SeekableByteInputStream#seek(int)
 	 */
 	@Override
 	public final void seek(int offset) {
@@ -49,7 +49,7 @@ public final class SeekableByteArrayStream implements SeekableByteInputStream {
 	}
 
 	/**
-	 * @see net.project54.maplestory.tools.data.input.SeekableInputStreamByteStream#getPosition()
+	 * @see com.github.javawow.data.input.SeekableByteInputStream#getPosition()
 	 */
 	@Override
 	public final int getPosition() {
