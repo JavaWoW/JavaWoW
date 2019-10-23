@@ -52,6 +52,6 @@ public final class RealmListRequestHandler implements BasicHandler {
 		lews.write(1);
 		// end
 		lews.writeShort(0x10);
-		channel.write(lews.toByteArray());
+		channel.writeAndFlush(lews.toByteArray());
 	}
 }

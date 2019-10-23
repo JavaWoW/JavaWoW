@@ -86,6 +86,6 @@ public final class LoginVerifyHandler implements BasicHandler {
 		lews.writeInt(accountFlag);
 		lews.writeInt(0); // surveyId
 		lews.writeShort(0); // ?
-		channel.write(lews.toByteArray()); // send the packet
+		channel.writeAndFlush(lews.toByteArray()); // send the packet
 	}
 }

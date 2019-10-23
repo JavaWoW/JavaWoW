@@ -80,6 +80,6 @@ public final class LoginRequestHandler implements BasicHandler {
 		lews.write(s);
 		lews.write(new byte[16]);
 		lews.write(0);
-		channel.write(lews.toByteArray()); // send the packet
+		channel.writeAndFlush(lews.toByteArray()); // send the packet
 	}
 }
