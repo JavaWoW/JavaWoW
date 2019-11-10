@@ -58,10 +58,10 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<!--<maven.compiler.release>8</maven.compiler.release>-->
-		<checker-qual.version>2.11.1</checker-qual.version>
+		<checker-qual.version>3.0.0</checker-qual.version>
 		<error-prone.version>2.3.3</error-prone.version>
 		<slf4j.version>1.7.28</slf4j.version>
-		<netty.version>4.1.42.Final</netty.version>
+		<netty.version>4.1.43.Final</netty.version>
 		<bc.version>1.64</bc.version>
 		<log4j.version>2.12.1</log4j.version>
 	</properties>
