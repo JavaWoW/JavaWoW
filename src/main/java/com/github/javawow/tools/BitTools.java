@@ -1,3 +1,21 @@
+/*
+ * Java World of Warcraft Emulation Project
+ * Copyright (C) 2015-2020 JavaWoW
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.github.javawow.tools;
 
 import java.math.BigInteger;
@@ -18,7 +36,7 @@ public final class BitTools {
 	 * Converts a BigInteger into a little-endian byte array of minSize or greater,
 	 * dropping the extra sign byte if the number is positive.
 	 * 
-	 * @param bi The BigInteger to convert.
+	 * @param bi      The BigInteger to convert.
 	 * @param minSize The minimum length of the byte array to return.
 	 * @return
 	 */
@@ -26,7 +44,8 @@ public final class BitTools {
 		byte[] b = bi.toByteArray();
 		int newLength;
 		boolean ignoreMSB = false;
-		if (b[0] == 0) { // most significant byte (sign byte) is 0 (positive), we ignore the sign byte (if it exists)
+		if (b[0] == 0) { // most significant byte (sign byte) is 0 (positive), we ignore the sign byte
+							// (if it exists)
 			newLength = b.length - 1;
 			ignoreMSB = true;
 		} else {
@@ -44,7 +63,7 @@ public final class BitTools {
 	 * Converts a BigInteger into a big-endian byte array of minSize or greater,
 	 * dropping the extra sign byte if the number is positive.
 	 * 
-	 * @param bi The BigInteger to convert.
+	 * @param bi      The BigInteger to convert.
 	 * @param minSize The minimum length of the byte array to return.
 	 * @return
 	 */
@@ -52,7 +71,8 @@ public final class BitTools {
 		byte[] b = bi.toByteArray();
 		int newLength;
 		boolean ignoreMSB = false;
-		if (b[0] == 0) { // most significant byte (sign byte) is 0 (positive), we ignore the sign byte (if it exists)
+		if (b[0] == 0) { // most significant byte (sign byte) is 0 (positive), we ignore the sign byte
+							// (if it exists)
 			newLength = b.length - 1;
 			ignoreMSB = true;
 		} else {
@@ -70,7 +90,7 @@ public final class BitTools {
 	 * Converts the specified byte array into a BigInteger, the byte array can be
 	 * interpreted differently based on endianness.
 	 * 
-	 * @param arr The byte array to convert into a BigInteger.
+	 * @param arr          The byte array to convert into a BigInteger.
 	 * @param littleEndian True if the byte array is little-endian, false otherwise.
 	 * @return
 	 */

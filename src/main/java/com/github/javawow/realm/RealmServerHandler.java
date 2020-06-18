@@ -1,3 +1,21 @@
+/*
+ * Java World of Warcraft Emulation Project
+ * Copyright (C) 2015-2020 JavaWoW
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.github.javawow.realm;
 
 import java.util.HashMap;
@@ -14,6 +32,7 @@ import com.github.javawow.data.output.LittleEndianWriterStream;
 import com.github.javawow.realm.handler.RealmVerifyHandler;
 import com.github.javawow.tools.BasicHandler;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
@@ -44,6 +63,9 @@ final class RealmServerHandler extends ChannelInboundHandlerAdapter {
 		LittleEndianWriterStream lews = new LittleEndianWriterStream();
 		lews.writeShort(0x01EC); // header
 		lews.writeInt(1); // ?
+		int authSeed = 1337;
+		lews.writeInt(authSeed); // auth seed
+		System.out.println("auth seed: " + authSeed);
 		Random r = new Random(1337);
 		byte[] seed1 = new byte[16];
 		byte[] seed2 = new byte[16];
@@ -51,17 +73,20 @@ final class RealmServerHandler extends ChannelInboundHandlerAdapter {
 		r.nextBytes(seed2);
 		lews.write(seed1); // ?
 		lews.write(seed2); // ?
-		ctx.write(lews.toByteArray());
+		LOGGER.debug("Packet Length: {}", lews.toByteArray().length);
+		ctx.channel().writeAndFlush(lews.toByteArray());
+		LOGGER.debug("Sent Authentication Challenge");
 	}
 
 	@Override
 	public final void channelInactive(ChannelHandlerContext ctx) throws Exception {
+//		LOGGER.debug("IoSession closed with {}.", ctx.channel().remoteAddress());
 		super.channelInactive(ctx);
 	}
 
 	@Override
 	public final void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-		SeekableLittleEndianAccessor slea = new GenericSeekableLittleEndianAccessor(new SeekableByteArrayStream((byte[]) msg));
+		SeekableLittleEndianAccessor slea = new GenericSeekableLittleEndianAccessor(new SeekableByteArrayStream(((ByteBuf) msg).array()));
 		short header = slea.readShort();
 		BasicHandler handler = handlers.get(header);
 		if (handler != null) {

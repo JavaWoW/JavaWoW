@@ -1,3 +1,21 @@
+/*
+ * Java World of Warcraft Emulation Project
+ * Copyright (C) 2015-2020 JavaWoW
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.github.javawow.tools.srp;
 
 import java.math.BigInteger;
@@ -25,7 +43,7 @@ public final class WoWSRP6Util extends SRP6Util {
 	public static BigInteger calculateX(Digest digest, BigInteger N, byte[] salt, byte[] identity, byte[] password) {
 		byte[] output = new byte[digest.getDigestSize()];
 		digest.update(identity, 0, identity.length);
-		digest.update((byte)':');
+		digest.update((byte) ':');
 		digest.update(password, 0, password.length);
 		digest.doFinal(output, 0);
 		digest.update(salt, 0, salt.length);
@@ -51,17 +69,19 @@ public final class WoWSRP6Util extends SRP6Util {
 		return val;
 	}
 
-	/** 
+	/**
 	 * Computes the client evidence message (M1) according to the standard routine:
 	 * M1 = H( H( N ) ^ H( g ) | H( I ) | s | A | B | H( S ) )
+	 * 
 	 * @param digest The Digest used as the hashing function H
-	 * @param N Modulus used to get the pad length
-	 * @param A The public client value
-	 * @param B The public server value
-	 * @param S The secret calculated by both sides
+	 * @param N      Modulus used to get the pad length
+	 * @param A      The public client value
+	 * @param B      The public server value
+	 * @param S      The secret calculated by both sides
 	 * @return M1 The calculated client evidence message
 	 */
-	public static BigInteger calculateM1(Digest digest, BigInteger N, BigInteger g, byte[] I, byte[] s, BigInteger A, BigInteger B, BigInteger S) {
+	public static BigInteger calculateM1(Digest digest, BigInteger N, BigInteger g, byte[] I, byte[] s, BigInteger A,
+			BigInteger B, BigInteger S) {
 		// Take S and convert it into a little-endian byte array
 		byte[] S_le = BitTools.toLEByteArray(S, 32);
 		byte[] S_even_bytes = new byte[16];
@@ -119,14 +139,15 @@ public final class WoWSRP6Util extends SRP6Util {
 		return M1;
 	}
 
-	/** 
+	/**
 	 * Computes the server evidence message (M2) according to the standard routine:
 	 * M2 = H( A | M1 | S )
+	 * 
 	 * @param digest The Digest used as the hashing function H
-	 * @param N Modulus used to get the pad length
-	 * @param A The public client value
-	 * @param M1 The client evidence message
-	 * @param S The secret calculated by both sides
+	 * @param N      Modulus used to get the pad length
+	 * @param A      The public client value
+	 * @param M1     The client evidence message
+	 * @param S      The secret calculated by both sides
 	 * @return M2 The calculated server evidence message
 	 */
 	public static BigInteger calculateM2(Digest digest, BigInteger N, BigInteger A, BigInteger M1, BigInteger S) {
@@ -170,14 +191,15 @@ public final class WoWSRP6Util extends SRP6Util {
 
 	/**
 	 * Computes the final Key according to the standard routine: Key = H(S)
+	 * 
 	 * @param digest The Digest used as the hashing function H
-	 * @param N Modulus used to get the pad length
-	 * @param S The secret calculated by both sides
+	 * @param N      Modulus used to get the pad length
+	 * @param S      The secret calculated by both sides
 	 * @return
 	 */
 	public static BigInteger calculateKey(Digest digest, BigInteger N, BigInteger S) {
 		int padLength = (N.bitLength() + 7) / 8;
-		byte[] _S = getPadded(S,padLength);
+		byte[] _S = getPadded(S, padLength);
 		digest.update(_S, 0, _S.length);
 		byte[] output = new byte[digest.getDigestSize()];
 		digest.doFinal(output, 0);

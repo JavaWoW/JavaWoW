@@ -1,3 +1,21 @@
+/*
+ * Java World of Warcraft Emulation Project
+ * Copyright (C) 2015-2020 JavaWoW
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.github.javawow.tools.srp;
 
 import java.math.BigInteger;
@@ -15,13 +33,15 @@ public final class WoWSRP6Server extends SRP6Server {
 	private WoWSRP6Server() {
 	}
 
-	public static final WoWSRP6Server init(SRP6GroupParameters params, BigInteger v, byte[] I, byte[] s, Digest digest, SecureRandom random) {
+	public static final WoWSRP6Server init(SRP6GroupParameters params, BigInteger v, byte[] I, byte[] s, Digest digest,
+			SecureRandom random) {
 		WoWSRP6Server srp = new WoWSRP6Server();
 		srp.initInternal(params, v, I, s, digest, random);
 		return srp;
 	}
 
-	private final void initInternal(SRP6GroupParameters params, BigInteger v, byte[] I, byte[] s, Digest digest, SecureRandom random) {
+	private final void initInternal(SRP6GroupParameters params, BigInteger v, byte[] I, byte[] s, Digest digest,
+			SecureRandom random) {
 		this.I = I.clone();
 		this.s = s.clone();
 		super.init(params.getN(), params.getG(), v, digest, random);
@@ -38,9 +58,10 @@ public final class WoWSRP6Server extends SRP6Server {
 	}
 
 	/**
-	* Generates the server's credentials that are to be sent to the client.
-	* @return The server's public value to the client
-	*/
+	 * Generates the server's credentials that are to be sent to the client.
+	 * 
+	 * @return The server's public value to the client
+	 */
 	@Override
 	public final BigInteger generateServerCredentials() {
 		BigInteger k = BigInteger.valueOf(3); // k = 3 for legacy SRP-6
@@ -50,11 +71,13 @@ public final class WoWSRP6Server extends SRP6Server {
 	}
 
 	/**
-	* Processes the client's credentials. If valid the shared secret is generated and returned.
-	* @param clientA The client's credentials
-	* @return A shared secret BigInteger
-	* @throws CryptoException If client's credentials are invalid
-	*/
+	 * Processes the client's credentials. If valid the shared secret is generated
+	 * and returned.
+	 * 
+	 * @param clientA The client's credentials
+	 * @return A shared secret BigInteger
+	 * @throws CryptoException If client's credentials are invalid
+	 */
 	@Override
 	public final BigInteger calculateSecret(BigInteger clientA) throws CryptoException {
 		this.A = WoWSRP6Util.validatePublicValue(N, clientA);
@@ -97,17 +120,19 @@ public final class WoWSRP6Server extends SRP6Server {
 	}
 
 	/**
-	* Authenticates the received client evidence message M1 and saves it only if correct.
-	* To be called after calculating the secret S.
-	* @param clientM1 the client side generated evidence message
-	* @return A boolean indicating if the client message M1 was the expected one.
-	* @throws CryptoException
-	*/
+	 * Authenticates the received client evidence message M1 and saves it only if
+	 * correct. To be called after calculating the secret S.
+	 * 
+	 * @param clientM1 the client side generated evidence message
+	 * @return A boolean indicating if the client message M1 was the expected one.
+	 * @throws CryptoException
+	 */
 	@Override
 	public final boolean verifyClientEvidenceMessage(BigInteger clientM1) throws CryptoException {
 		// Verify pre-requirements
 		if (this.A == null || this.B == null || this.S == null) {
-			throw new CryptoException("Impossible to compute and verify M1: some data are missing from the previous operations (A,B,S)");
+			throw new CryptoException(
+					"Impossible to compute and verify M1: some data are missing from the previous operations (A,B,S)");
 		}
 		// Compute the own client evidence message 'M1'
 		BigInteger computedM1 = WoWSRP6Util.calculateM1(digest, N, g, I, s, A, B, S);
@@ -119,15 +144,17 @@ public final class WoWSRP6Server extends SRP6Server {
 	}
 
 	/**
-	* Computes the server evidence message M2 using the previously verified values.
-	* To be called after successfully verifying the client evidence message M1.
-	* @return M2: the server side generated evidence message
-	* @throws CryptoException
-	*/
+	 * Computes the server evidence message M2 using the previously verified values.
+	 * To be called after successfully verifying the client evidence message M1.
+	 * 
+	 * @return M2: the server side generated evidence message
+	 * @throws CryptoException
+	 */
 	public final BigInteger calculateServerEvidenceMessage() throws CryptoException {
 		// Verify pre-requirements
 		if (this.A == null || this.M1 == null || this.S == null) {
-			throw new CryptoException("Impossible to compute M2: some data are missing from the previous operations (A,M1,S)");
+			throw new CryptoException(
+					"Impossible to compute M2: some data are missing from the previous operations (A,M1,S)");
 		}
 		// Compute the server evidence message 'M2'
 		this.M2 = WoWSRP6Util.calculateM2(digest, N, A, M1, S);
