@@ -16,27 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.javawow.tools;
+package com.github.javawow.auth.message;
 
-import com.github.javawow.data.input.SeekableLittleEndianAccessor;
+import com.google.errorprone.annotations.Immutable;
 
-import io.netty.channel.Channel;
+/**
+ * WoW client realmlist request message.
+ * 
+ * @author Jon Huang
+ *
+ */
+@Immutable
+public final class RealmlistRequestMessage {
+	private final int unk;
 
-public interface BasicHandler {
-	/**
-	 * Verifies if the current state is valid for the handler to be executed.
-	 * 
-	 * @param session The session attempting to execute the handler.
-	 * @return true for a valid state, false otherwise
-	 */
-	boolean hasValidState(Channel session);
+	public RealmlistRequestMessage(int unk) {
+		this.unk = unk;
+	}
 
-	/**
-	 * Implement this method to handle the operation to perform when the handler is
-	 * called.
-	 * 
-	 * @param session The session executing this handler.
-	 * @param slea    The seekable buffer containing the packet received.
-	 */
-	void handlePacket(Channel session, SeekableLittleEndianAccessor slea);
+	public final int getUnk() {
+		return unk;
+	}
 }

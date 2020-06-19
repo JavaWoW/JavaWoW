@@ -20,6 +20,7 @@ package com.github.javawow.tools.srp;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.Arrays;
 
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.Digest;
@@ -31,6 +32,7 @@ public final class WoWSRP6Server extends SRP6Server {
 	private byte[] s;
 
 	private WoWSRP6Server() {
+		// kept private to force use of init
 	}
 
 	public static final WoWSRP6Server init(SRP6GroupParameters params, BigInteger v, byte[] I, byte[] s, Digest digest,
@@ -42,8 +44,8 @@ public final class WoWSRP6Server extends SRP6Server {
 
 	private final void initInternal(SRP6GroupParameters params, BigInteger v, byte[] I, byte[] s, Digest digest,
 			SecureRandom random) {
-		this.I = I.clone();
-		this.s = s.clone();
+		this.I = Arrays.copyOf(I, I.length);
+		this.s = Arrays.copyOf(s, s.length);
 		super.init(params.getN(), params.getG(), v, digest, random);
 	}
 
@@ -82,40 +84,7 @@ public final class WoWSRP6Server extends SRP6Server {
 	public final BigInteger calculateSecret(BigInteger clientA) throws CryptoException {
 		this.A = WoWSRP6Util.validatePublicValue(N, clientA);
 		this.u = WoWSRP6Util.calculateU(digest, N, A, B);
-		this.S = calculateS();
-		return S;
-	}
-
-	private final BigInteger calculateS() {
-		// XXX Might need to modify this method to have the code below
-		BigInteger S = v.modPow(u, N).multiply(A).mod(N).modPow(b, N);
-		/*// Take S and convert it into a little-endian byte array
-		byte[] S_le = BitTools.toLEByteArray(S, 32);
-		byte[] S_even_bytes = new byte[16];
-		byte[] S_odd_bytes = new byte[16];
-		// Read in the even-indexed bytes
-		for (int i = 0, c = 0; i < 32; i += 2) {
-			S_even_bytes[c++] = S_le[i];
-		}
-		for (int i = 1, c = 0; i < 32; i += 2) {
-			S_odd_bytes[c++] = S_le[i];
-		}
-		digest.update(S_even_bytes, 0, S_even_bytes.length);
-		byte[] S_even_digested_bytes = new byte[digest.getDigestSize()];
-		digest.doFinal(S_even_digested_bytes, 0);
-		digest.update(S_odd_bytes, 0, S_odd_bytes.length);
-		byte[] S_odd_digested_bytes = new byte[digest.getDigestSize()];
-		digest.doFinal(S_odd_digested_bytes, 0);
-		byte[] hashed = new byte[digest.getDigestSize() * 2];
-		// copy the even-indexed bytes in
-		for (int i = 0, c = 0; i < 40; i += 2) {
-			hashed[i] = S_even_digested_bytes[c++];
-		}
-		// copy the odd-indexed bytes in
-		for (int i = 1, c = 0; i < 40; i += 2) {
-			hashed[i] = S_odd_digested_bytes[c++];
-		}
-		return new BigInteger(1, hashed);*/
+		this.S = v.modPow(u, N).multiply(A).mod(N).modPow(b, N);
 		return S;
 	}
 
@@ -150,6 +119,7 @@ public final class WoWSRP6Server extends SRP6Server {
 	 * @return M2: the server side generated evidence message
 	 * @throws CryptoException
 	 */
+	@Override
 	public final BigInteger calculateServerEvidenceMessage() throws CryptoException {
 		// Verify pre-requirements
 		if (this.A == null || this.M1 == null || this.S == null) {
@@ -159,5 +129,23 @@ public final class WoWSRP6Server extends SRP6Server {
 		// Compute the server evidence message 'M2'
 		this.M2 = WoWSRP6Util.calculateM2(digest, N, A, M1, S);
 		return M2;
+	}
+
+	/**
+	 * Computes the final session key as a result of the SRP successful mutual
+	 * authentication To be called after calculating the server evidence message M2.
+	 * 
+	 * @return Key: the mutual authenticated symmetric session key
+	 * @throws CryptoException
+	 */
+	@Override
+	public final BigInteger calculateSessionKey() throws CryptoException {
+		// Verify pre-requirements
+		if (this.S == null || this.M1 == null || this.M2 == null) {
+			throw new CryptoException(
+					"Impossible to compute Key: " + "some data are missing from the previous operations (S,M1,M2)");
+		}
+		this.Key = WoWSRP6Util.calculateKey(digest, N, S);
+		return Key;
 	}
 }

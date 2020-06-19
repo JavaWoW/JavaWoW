@@ -24,11 +24,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.javawow.data.input.SeekableLittleEndianAccessor;
-import com.github.javawow.tools.BasicHandler;
+import com.github.javawow.data.output.LittleEndianWriterStream;
 
 import io.netty.channel.Channel;
 
-public final class RealmVerifyHandler implements BasicHandler {
+public final class RealmVerifyHandler implements BasicRealmHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(RealmVerifyHandler.class);
 	private static final RealmVerifyHandler INSTANCE = new RealmVerifyHandler();
 
@@ -40,12 +40,12 @@ public final class RealmVerifyHandler implements BasicHandler {
 	}
 
 	@Override
-	public final boolean hasValidState(Channel session) {
+	public final boolean hasValidState(Channel channel) {
 		return true; // XXX Any other ways?
 	}
 
 	@Override
-	public final void handlePacket(Channel session, SeekableLittleEndianAccessor slea) {
+	public final void handlePacket(Channel channel, SeekableLittleEndianAccessor slea) {
 		slea.skip(2); // ?
 		int buildNumber = slea.readInt();
 		int serverId = slea.readInt(); // server Id
@@ -55,7 +55,7 @@ public final class RealmVerifyHandler implements BasicHandler {
 		int region = slea.readInt(); // region
 		int battleGroup = slea.readInt(); // battle group
 		int realmIndex = slea.readInt(); // realm index
-		long unk4 = slea.readLong(); // unk4
+		long dosResponse = slea.readLong(); // unk4
 		byte[] digest = slea.read(20);
 		System.out.println("Build Number: " + buildNumber);
 		System.out.println("Server ID: " + serverId);
@@ -65,8 +65,29 @@ public final class RealmVerifyHandler implements BasicHandler {
 		System.out.println("Region: " + region);
 		System.out.println("Battle Group: " + battleGroup);
 		System.out.println("Realm Index: " + realmIndex);
-		System.out.println("Unk4: " + unk4);
+		System.out.println("DosResponse: " + dosResponse);
 		System.out.println("Digest: " + Arrays.toString(digest));
 		LOGGER.info(slea.toString());
+		// TODO Initialize encryption
+		boolean error = true;
+		if (error) {
+			LittleEndianWriterStream lews = new LittleEndianWriterStream();
+			lews.writeShort(0x01EE); // header
+			lews.write(13); // code (success/error)
+			channel.writeAndFlush(lews.toByteArray());
+		} else {
+			LittleEndianWriterStream lews = new LittleEndianWriterStream();
+			lews.writeShort(0x01EE); // header
+			lews.write(12); // code (success/error)
+			lews.writeInt(0); // BillingTimeRemaining
+			lews.write(0); // BillingPlanFlags
+			lews.writeInt(0); // BillingTimeRested
+			lews.write(2); // 0 - normal, 1 - TBC, 2 - WOTLK, must be set in database manually for each account
+			// queue information
+			lews.writeInt(1); // Queue position
+			lews.write(0); // Realm has a free character migration - bool
+			// end queue information
+			channel.writeAndFlush(lews.toByteArray());
+		}
 	}
 }

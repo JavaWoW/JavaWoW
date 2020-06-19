@@ -16,27 +16,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.javawow.data.output;
+package com.github.javawow.auth;
 
+import io.netty.util.AttributeKey;
 
-/**
- * @author Jon
- *
- */
-public interface LittleEndianWriter {
-	void writeZeroBytes(int i);
-	void write(byte b[]);
-	void write(byte b);
-	void write(int b);
-	void writeShort(int s);
-	void writeInt(int i);
-	void writeInt(long i);
-	void writeLong(long l);
-	void writeFloat(float f);
-	void writeBEFloat(float f);
-	void writeDouble(double d);
-	void writeBEDouble(double d);
-	void writeAsciiString(String s);
-	void writeAsciiString(String s, int max);
-	void writeNullTerminatedAsciiString(String s);
+public enum AuthState {
+	/**
+	 * Nothing has been received from the client, we do not know who the client is.
+	 */
+	UNAUTHENTICATED,
+	/**
+	 * The client has sent us SRP-6a (I) which is their identity, however we have
+	 * not authenticated their identity.
+	 */
+	IDENTIFIED,
+	/**
+	 * The client has sent us SRP-6a (A and M1) which we have confirmed is correct,
+	 * therefore the client is authenticated.
+	 */
+	AUTHENTICATED;
+
+	public static final AttributeKey<AuthState> ATTRIBUTE_KEY = AttributeKey
+			.newInstance(AuthState.class.getSimpleName());
 }

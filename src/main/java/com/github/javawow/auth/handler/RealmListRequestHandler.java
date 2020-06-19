@@ -19,17 +19,17 @@
 package com.github.javawow.auth.handler;
 
 import com.github.javawow.auth.AuthServer;
-import com.github.javawow.data.input.SeekableLittleEndianAccessor;
+import com.github.javawow.auth.message.RealmlistRequestMessage;
 import com.github.javawow.data.output.LittleEndianWriterStream;
-import com.github.javawow.tools.BasicHandler;
 
 import io.netty.channel.Channel;
 
-public final class RealmListRequestHandler implements BasicHandler {
+public final class RealmListRequestHandler implements BasicAuthHandler<RealmlistRequestMessage> {
 //	private static final Logger LOGGER = LoggerFactory.getLogger(RealmListRequestHandler.class);
 	private static final RealmListRequestHandler INSTANCE = new RealmListRequestHandler();
 
 	private RealmListRequestHandler() {
+		// singleton
 	}
 
 	public static final RealmListRequestHandler getInstance() {
@@ -42,7 +42,7 @@ public final class RealmListRequestHandler implements BasicHandler {
 	}
 
 	@Override
-	public final void handlePacket(Channel channel, SeekableLittleEndianAccessor slea) {
+	public final void handleMessage(Channel channel, RealmlistRequestMessage msg) {
 		LittleEndianWriterStream lews = new LittleEndianWriterStream();
 		lews.write(0x10); // header
 		lews.writeShort(77); // size of entire packet

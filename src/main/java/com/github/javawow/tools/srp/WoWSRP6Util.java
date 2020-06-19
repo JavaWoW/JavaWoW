@@ -28,8 +28,15 @@ import org.bouncycastle.util.BigIntegers;
 
 import com.github.javawow.tools.BitTools;
 
+/**
+ * Provides functions unique to the WoW implementation of SRP-6.
+ * 
+ * @author Jon Huang
+ *
+ */
 public final class WoWSRP6Util extends SRP6Util {
 	private WoWSRP6Util() {
+		// static utility class
 	}
 
 	public static BigInteger calculateK(Digest digest, BigInteger N, BigInteger g) {
@@ -82,57 +89,33 @@ public final class WoWSRP6Util extends SRP6Util {
 	 */
 	public static BigInteger calculateM1(Digest digest, BigInteger N, BigInteger g, byte[] I, byte[] s, BigInteger A,
 			BigInteger B, BigInteger S) {
-		// Take S and convert it into a little-endian byte array
-		byte[] S_le = BitTools.toLEByteArray(S, 32);
-		byte[] S_even_bytes = new byte[16];
-		byte[] S_odd_bytes = new byte[16];
-		// Read in the even-indexed bytes
-		for (int i = 0, c = 0; i < 32; i += 2) {
-			S_even_bytes[c++] = S_le[i];
-		}
-		for (int i = 1, c = 0; i < 32; i += 2) {
-			S_odd_bytes[c++] = S_le[i];
-		}
-		digest.update(S_even_bytes, 0, S_even_bytes.length);
-		byte[] S_even_digested_bytes = new byte[digest.getDigestSize()];
-		digest.doFinal(S_even_digested_bytes, 0);
-		digest.update(S_odd_bytes, 0, S_odd_bytes.length);
-		byte[] S_odd_digested_bytes = new byte[digest.getDigestSize()];
-		digest.doFinal(S_odd_digested_bytes, 0);
-		byte[] hashed = new byte[digest.getDigestSize() * 2];
-		// copy the even-indexed bytes in
-		for (int i = 0, c = 0; i < 40; i += 2) {
-			hashed[i] = S_even_digested_bytes[c++];
-		}
-		// copy the odd-indexed bytes in
-		for (int i = 1, c = 0; i < 40; i += 2) {
-			hashed[i] = S_odd_digested_bytes[c++];
-		}
+		BigInteger K = calculateKey(digest, N, S);
 		int padLength = (N.bitLength() + 7) / 8;
 		byte[] N_bytes = BitTools.reverse(getPadded(N, padLength));
 		digest.update(N_bytes, 0, N_bytes.length);
-		byte[] N_digested = new byte[digest.getDigestSize()];
+		byte[] N_digested = new byte[digest.getDigestSize()]; // H( N )
 		digest.doFinal(N_digested, 0);
 		byte[] g_bytes = BitTools.reverse(BigIntegers.asUnsignedByteArray(g));
 		digest.update(g_bytes, 0, g_bytes.length);
-		byte[] g_digested = new byte[digest.getDigestSize()];
+		byte[] g_digested = new byte[digest.getDigestSize()]; // H( g )
 		digest.doFinal(g_digested, 0);
-		byte[] product = new byte[digest.getDigestSize()];
-		for (int i = 0, n = digest.getDigestSize(); i < n; i++) {
-			product[i] = (byte) (N_digested[i] ^ g_digested[i]); // H( N ) ^ H( g )
+		byte[] product = new byte[digest.getDigestSize()]; // H( N ) ^ H( g )
+		for (int i = 0; i < product.length; i++) {
+			product[i] = (byte) (N_digested[i] ^ g_digested[i]);
 		}
 		digest.update(I, 0, I.length);
 		byte[] I_digested = new byte[digest.getDigestSize()]; // H( I )
 		digest.doFinal(I_digested, 0);
 		byte[] A_bytes = BitTools.reverse(getPadded(A, padLength));
 		byte[] B_bytes = BitTools.reverse(getPadded(B, padLength));
+		byte[] K_bytes = BigIntegers.asUnsignedByteArray(K);
 		// Add in the bytes now
 		digest.update(product, 0, product.length); // H( N ) ^ H( g )
 		digest.update(I_digested, 0, I_digested.length); // H( I )
 		digest.update(s, 0, s.length); // s
 		digest.update(A_bytes, 0, A_bytes.length); // A
 		digest.update(B_bytes, 0, B_bytes.length); // B
-		digest.update(hashed, 0, hashed.length);
+		digest.update(K_bytes, 0, K_bytes.length); // H( S )
 		byte[] output = new byte[digest.getDigestSize()];
 		digest.doFinal(output, 0);
 		BigInteger M1 = new BigInteger(1, output);
@@ -141,7 +124,7 @@ public final class WoWSRP6Util extends SRP6Util {
 
 	/**
 	 * Computes the server evidence message (M2) according to the standard routine:
-	 * M2 = H( A | M1 | S )
+	 * M2 = H( A | M1 | H( S ) )
 	 * 
 	 * @param digest The Digest used as the hashing function H
 	 * @param N      Modulus used to get the pad length
@@ -151,38 +134,14 @@ public final class WoWSRP6Util extends SRP6Util {
 	 * @return M2 The calculated server evidence message
 	 */
 	public static BigInteger calculateM2(Digest digest, BigInteger N, BigInteger A, BigInteger M1, BigInteger S) {
-		// Take S and convert it into a little-endian byte array
-		byte[] S_le = BitTools.toLEByteArray(S, 32);
-		byte[] S_even_bytes = new byte[16];
-		byte[] S_odd_bytes = new byte[16];
-		// Read in the even-indexed bytes
-		for (int i = 0, c = 0; i < 32; i += 2) {
-			S_even_bytes[c++] = S_le[i];
-		}
-		for (int i = 1, c = 0; i < 32; i += 2) {
-			S_odd_bytes[c++] = S_le[i];
-		}
-		digest.update(S_even_bytes, 0, S_even_bytes.length);
-		byte[] S_even_digested_bytes = new byte[digest.getDigestSize()];
-		digest.doFinal(S_even_digested_bytes, 0);
-		digest.update(S_odd_bytes, 0, S_odd_bytes.length);
-		byte[] S_odd_digested_bytes = new byte[digest.getDigestSize()];
-		digest.doFinal(S_odd_digested_bytes, 0);
-		byte[] hashed = new byte[digest.getDigestSize() * 2];
-		// copy the even-indexed bytes in
-		for (int i = 0, c = 0; i < 40; i += 2) {
-			hashed[i] = S_even_digested_bytes[c++];
-		}
-		// copy the odd-indexed bytes in
-		for (int i = 1, c = 0; i < 40; i += 2) {
-			hashed[i] = S_odd_digested_bytes[c++];
-		}
+		BigInteger K = calculateKey(digest, N, S);
 		int padLength = (N.bitLength() + 7) / 8;
 		byte[] A_bytes = BitTools.reverse(getPadded(A, padLength));
 		byte[] M1_bytes = BigIntegers.asUnsignedByteArray(M1);
+		byte[] K_bytes = BigIntegers.asUnsignedByteArray(K);
 		digest.update(A_bytes, 0, A_bytes.length); // A
 		digest.update(M1_bytes, 0, M1_bytes.length); // M1
-		digest.update(hashed, 0, hashed.length);
+		digest.update(K_bytes, 0, K_bytes.length); // K
 		byte[] output = new byte[digest.getDigestSize()];
 		digest.doFinal(output, 0);
 		BigInteger M2 = new BigInteger(1, output);
@@ -198,12 +157,33 @@ public final class WoWSRP6Util extends SRP6Util {
 	 * @return
 	 */
 	public static BigInteger calculateKey(Digest digest, BigInteger N, BigInteger S) {
-		int padLength = (N.bitLength() + 7) / 8;
-		byte[] _S = getPadded(S, padLength);
-		digest.update(_S, 0, _S.length);
-		byte[] output = new byte[digest.getDigestSize()];
-		digest.doFinal(output, 0);
-		return new BigInteger(1, output);
+		// Take S and convert it into a little-endian byte array
+		byte[] S_le = BitTools.toLEByteArray(S, 32);
+		byte[] S_even_bytes = new byte[16];
+		byte[] S_odd_bytes = new byte[16];
+		// Read in the even-indexed bytes
+		for (int i = 0, c = 0; i < 32; i += 2) {
+			S_even_bytes[c++] = S_le[i];
+		}
+		for (int i = 1, c = 0; i < 32; i += 2) {
+			S_odd_bytes[c++] = S_le[i];
+		}
+		digest.update(S_even_bytes, 0, S_even_bytes.length);
+		byte[] S_even_digested_bytes = new byte[digest.getDigestSize()];
+		digest.doFinal(S_even_digested_bytes, 0);
+		digest.update(S_odd_bytes, 0, S_odd_bytes.length);
+		byte[] S_odd_digested_bytes = new byte[digest.getDigestSize()];
+		digest.doFinal(S_odd_digested_bytes, 0);
+		byte[] K_bytes = new byte[digest.getDigestSize() * 2];
+		// copy the even-indexed bytes in
+		for (int i = 0, c = 0; i < 40; i += 2) {
+			K_bytes[i] = S_even_digested_bytes[c++];
+		}
+		// copy the odd-indexed bytes in
+		for (int i = 1, c = 0; i < 40; i += 2) {
+			K_bytes[i] = S_odd_digested_bytes[c++];
+		}
+		return new BigInteger(1, K_bytes);
 	}
 
 	private static BigInteger hashPaddedPair(Digest digest, BigInteger N, BigInteger n1, BigInteger n2) {

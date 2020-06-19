@@ -29,8 +29,8 @@ import com.github.javawow.data.input.GenericSeekableLittleEndianAccessor;
 import com.github.javawow.data.input.SeekableByteArrayStream;
 import com.github.javawow.data.input.SeekableLittleEndianAccessor;
 import com.github.javawow.data.output.LittleEndianWriterStream;
+import com.github.javawow.realm.handler.BasicRealmHandler;
 import com.github.javawow.realm.handler.RealmVerifyHandler;
-import com.github.javawow.tools.BasicHandler;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
@@ -42,7 +42,7 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 final class RealmServerHandler extends ChannelInboundHandlerAdapter {
 	private static final Logger LOGGER = LoggerFactory.getLogger(RealmServerHandler.class);
 	private static final RealmServerHandler INSTANCE = new RealmServerHandler();
-	private static final Map<Short, BasicHandler> handlers = new HashMap<Short, BasicHandler>();
+	private static final Map<Short, BasicRealmHandler> handlers = new HashMap<>();
 
 	static {
 		handlers.put((short) 0x1ED, RealmVerifyHandler.getInstance());
@@ -88,7 +88,7 @@ final class RealmServerHandler extends ChannelInboundHandlerAdapter {
 	public final void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 		SeekableLittleEndianAccessor slea = new GenericSeekableLittleEndianAccessor(new SeekableByteArrayStream(((ByteBuf) msg).array()));
 		short header = slea.readShort();
-		BasicHandler handler = handlers.get(header);
+		BasicRealmHandler handler = handlers.get(header);
 		if (handler != null) {
 			Channel ch = ctx.channel();
 			if (handler.hasValidState(ch)) {

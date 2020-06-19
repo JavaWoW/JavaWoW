@@ -16,27 +16,43 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.javawow.data.output;
+package com.github.javawow.auth.message;
 
+import com.google.errorprone.annotations.Immutable;
 
 /**
- * @author Jon
+ * WoW client reconnect proof message.
+ * 
+ * @author Jon Huang
  *
  */
-public interface LittleEndianWriter {
-	void writeZeroBytes(int i);
-	void write(byte b[]);
-	void write(byte b);
-	void write(int b);
-	void writeShort(int s);
-	void writeInt(int i);
-	void writeInt(long i);
-	void writeLong(long l);
-	void writeFloat(float f);
-	void writeBEFloat(float f);
-	void writeDouble(double d);
-	void writeBEDouble(double d);
-	void writeAsciiString(String s);
-	void writeAsciiString(String s, int max);
-	void writeNullTerminatedAsciiString(String s);
+@Immutable
+public final class ReconnectProofMessage {
+	private final byte[] R1;
+	private final byte[] R2;
+	private final byte[] R3;
+	private final byte numKeys; // number of keys
+
+	public ReconnectProofMessage(byte[] r1, byte[] r2, byte[] r3, byte numKeys) {
+		this.R1 = r1;
+		this.R2 = r2;
+		this.R3 = r3;
+		this.numKeys = numKeys;
+	}
+
+	public final byte[] getR1() {
+		return R1;
+	}
+
+	public final byte[] getR2() {
+		return R2;
+	}
+
+	public final byte[] getR3() {
+		return R3;
+	}
+
+	public final byte getNumKeys() {
+		return numKeys;
+	}
 }

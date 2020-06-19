@@ -16,27 +16,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.javawow.data.output;
+package com.github.javawow.auth.handler;
 
+import com.github.javawow.auth.message.ReconnectProofMessage;
 
-/**
- * @author Jon
- *
- */
-public interface LittleEndianWriter {
-	void writeZeroBytes(int i);
-	void write(byte b[]);
-	void write(byte b);
-	void write(int b);
-	void writeShort(int s);
-	void writeInt(int i);
-	void writeInt(long i);
-	void writeLong(long l);
-	void writeFloat(float f);
-	void writeBEFloat(float f);
-	void writeDouble(double d);
-	void writeBEDouble(double d);
-	void writeAsciiString(String s);
-	void writeAsciiString(String s, int max);
-	void writeNullTerminatedAsciiString(String s);
+import io.netty.channel.Channel;
+
+public final class ReconnectVerifyHandler implements BasicAuthHandler<ReconnectProofMessage> {
+	@Override
+	public final boolean hasValidState(Channel channel) {
+		return true;
+	}
+
+	@Override
+	public final void handleMessage(Channel channel, ReconnectProofMessage msg) {
+		// TODO Auto-generated method stub
+
+	}
 }

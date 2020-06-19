@@ -25,19 +25,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.javawow.auth.AuthServer;
-import com.github.javawow.data.input.SeekableLittleEndianAccessor;
-import com.github.javawow.data.output.LittleEndianWriterStream;
-import com.github.javawow.tools.BasicHandler;
-import com.github.javawow.tools.BitTools;
+import com.github.javawow.auth.AuthState;
+import com.github.javawow.auth.message.LoginProofMessage;
+import com.github.javawow.tools.packet.AuthPacketFactory;
 import com.github.javawow.tools.srp.WoWSRP6Server;
 
 import io.netty.channel.Channel;
 
-public final class LoginVerifyHandler implements BasicHandler {
+public final class LoginVerifyHandler implements BasicAuthHandler<LoginProofMessage> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(LoginVerifyHandler.class);
 	private static final LoginVerifyHandler INSTANCE = new LoginVerifyHandler();
 
 	private LoginVerifyHandler() {
+		// singleton
 	}
 
 	public static final LoginVerifyHandler getInstance() {
@@ -50,21 +50,15 @@ public final class LoginVerifyHandler implements BasicHandler {
 	}
 
 	@Override
-	public final void handlePacket(Channel channel, SeekableLittleEndianAccessor slea) {
+	public final void handleMessage(Channel channel, LoginProofMessage msg) {
 		// Step 3 : Client sends us A and M1
-		byte[] A_bytes = slea.read(32); // Little-endian format
-		byte[] M1_bytes = slea.read(20);
-		slea.skip(20); // crc_hash
-		slea.readByte();
-		slea.readByte();
 		WoWSRP6Server srp = channel.attr(AuthServer.SRP_ATTR).get();
 		if (srp == null) {
 			LOGGER.error("srp not set!");
 			channel.close();
 			return;
 		}
-		BigInteger A = BitTools.toBigInteger(A_bytes, true);
-		//BigInteger S;
+		BigInteger A = msg.getA();
 		try {
 			srp.calculateSecret(A);
 		} catch (CryptoException e) {
@@ -72,7 +66,7 @@ public final class LoginVerifyHandler implements BasicHandler {
 			channel.close();
 			return;
 		}
-		BigInteger M1 = BitTools.toBigInteger(M1_bytes, false);
+		BigInteger M1 = msg.getM1();
 		boolean M1_match;
 		try {
 			M1_match = srp.verifyClientEvidenceMessage(M1);
@@ -95,15 +89,9 @@ public final class LoginVerifyHandler implements BasicHandler {
 			channel.close();
 			return;
 		}
-		// Begin Packet Response:
-		LittleEndianWriterStream lews = new LittleEndianWriterStream();
-		lews.write(1); // cmd
-		lews.write(0); // error
-		lews.write(BitTools.toByteArray(M2, 20));
-		int accountFlag = 0x00800000; // 0x01 = GM, 0x08 = Trial, 0x00800000 = Pro pass (arena tournament)
-		lews.writeInt(accountFlag);
-		lews.writeInt(0); // surveyId
-		lews.writeShort(0); // ?
-		channel.writeAndFlush(lews.toByteArray()); // send the packet
+		// Set client attributes
+		channel.attr(AuthState.ATTRIBUTE_KEY).set(AuthState.AUTHENTICATED);
+		// Send M2 to the client
+		channel.writeAndFlush(AuthPacketFactory.getLoginProof(M2));
 	}
 }

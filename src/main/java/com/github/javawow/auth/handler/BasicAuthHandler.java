@@ -16,27 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.javawow.data.output;
+package com.github.javawow.auth.handler;
 
+import io.netty.channel.Channel;
 
-/**
- * @author Jon
- *
- */
-public interface LittleEndianWriter {
-	void writeZeroBytes(int i);
-	void write(byte b[]);
-	void write(byte b);
-	void write(int b);
-	void writeShort(int s);
-	void writeInt(int i);
-	void writeInt(long i);
-	void writeLong(long l);
-	void writeFloat(float f);
-	void writeBEFloat(float f);
-	void writeDouble(double d);
-	void writeBEDouble(double d);
-	void writeAsciiString(String s);
-	void writeAsciiString(String s, int max);
-	void writeNullTerminatedAsciiString(String s);
+public interface BasicAuthHandler<T> {
+	/**
+	 * Verifies if the current state is valid for the handler to be executed.
+	 * 
+	 * @param channel The channel attempting to execute the handler.
+	 * @return {@code true} for a valid state, {@code false} otherwise
+	 */
+	boolean hasValidState(Channel channel);
+
+	/**
+	 * Implement this method to handle the operation to perform when the handler is
+	 * called.
+	 * 
+	 * @param channel The channel executing this handler.
+	 * @param msg     The message from the client
+	 */
+	void handleMessage(Channel channel, T msg);
 }
