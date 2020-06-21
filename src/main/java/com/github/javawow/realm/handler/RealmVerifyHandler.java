@@ -23,7 +23,9 @@ import java.math.BigInteger;
 import java.util.Arrays;
 
 import javax.crypto.Cipher;
+import javax.xml.bind.DatatypeConverter;
 
+import org.bouncycastle.util.BigIntegers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,13 +94,14 @@ public final class RealmVerifyHandler implements BasicRealmHandler {
 			channel.close();
 			return;
 		}
+		byte[] K_bytes = BigIntegers.asUnsignedByteArray(K);
+		System.out.println(DatatypeConverter.printHexBinary(K_bytes));
 		// TODO Initialize encryption (RC4)
-		Cipher clientDecryptCipher = CryptoUtil.createRC4Cipher(true, K);
-		Cipher serverEncryptCipher = CryptoUtil.createRC4Cipher(false, K);
+		Cipher clientDecryptCipher = CryptoUtil.createRC4Cipher(false, K);
+		Cipher serverEncryptCipher = CryptoUtil.createRC4Cipher(true, K);
 		// Set the ciphers for WoW packet encryption/decryption
 		channel.attr(RealmDecoder.DECRYPT_CIPHER_KEY).set(clientDecryptCipher);
 		channel.attr(RealmEncoder.ENCRYPT_CIPHER_KEY).set(serverEncryptCipher);
-		
 		boolean error = true;
 		if (error) {
 			LittleEndianWriterStream lews = new LittleEndianWriterStream(0x01EE);

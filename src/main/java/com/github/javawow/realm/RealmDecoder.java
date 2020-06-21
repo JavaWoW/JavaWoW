@@ -65,21 +65,26 @@ public final class RealmDecoder extends ByteToMessageDecoder {
 		} else {
 			// Encryption is active, therefore the header is encrypted
 			// header length: packet size (2 bytes) + opcode (4 bytes)
-			byte[] encHeaderBuf = new byte[6]; // buffer to hold the encrypted header
-			byte[] headerBuf = new byte[6]; // buffer to hold the decrypted header
+			ByteBuf encHeaderBuf = ctx.alloc().heapBuffer(6, 6); // buffer to hold the encrypted header
+			ByteBuf headerBuf = ctx.alloc().heapBuffer(6, 6); // buffer to hold the decrypted header
 			try {
 				in.readBytes(encHeaderBuf);
-				int decryptLen = decryptCipher.update(encHeaderBuf, 0, 6, headerBuf, 0);
-				ByteBuf clientHeader = Unpooled.wrappedBuffer(headerBuf);
-				System.out.println("Decrypted Header:\n" + ByteBufUtil.prettyHexDump(clientHeader));
-				int packetLength = clientHeader.readShort();
+				int decryptLen = decryptCipher.update(encHeaderBuf.array(), 0, 6, headerBuf.array(), 0);
+				headerBuf.writerIndex(decryptLen);
+				System.out.println("Decrypted Header:\n" + ByteBufUtil.prettyHexDump(headerBuf));
+				int packetLength = headerBuf.readShort();
+				if (packetLength < 0 || packetLength > 10240) {
+					LOG.error("Invalid Packet Length: {}", packetLength);
+					ctx.close();
+					return;
+				}
 				System.out.println("Determined packet length: " + packetLength);
 				if (in.readableBytes() < packetLength) {
 					// still not enough data
 					in.resetReaderIndex();
 					return;
 				}
-				int opcode = clientHeader.readIntLE();
+				int opcode = headerBuf.readIntLE();
 //				ByteBuf buf = ctx.alloc().buffer(packetLength, packetLength);
 				ByteBuf buf = Unpooled.buffer(packetLength, packetLength);
 				buf.writeIntLE(opcode);
@@ -87,8 +92,8 @@ public final class RealmDecoder extends ByteToMessageDecoder {
 				out.add(buf);
 			} finally {
 				// release the buffers we just created
-//				encHeaderBuf.release();
-//				headerBuf.release();
+				encHeaderBuf.release();
+				headerBuf.release();
 			}
 		}
 	}
