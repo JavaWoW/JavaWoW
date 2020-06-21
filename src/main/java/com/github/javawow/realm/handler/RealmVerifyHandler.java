@@ -20,7 +20,11 @@ package com.github.javawow.realm.handler;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.Random;
 
 import javax.crypto.Cipher;
 import javax.xml.bind.DatatypeConverter;
@@ -61,7 +65,7 @@ public final class RealmVerifyHandler implements BasicRealmHandler {
 		int serverId = slea.readInt(); // server Id
 		String username = slea.readNullTerminatedAsciiString();
 		int loginServerType = slea.readInt(); // login server type
-		int clientSeed = slea.readInt(); // client seed
+		byte[] clientSeed = slea.read(4); // client seed
 		int region = slea.readInt(); // region
 		int battleGroup = slea.readInt(); // battle group
 		int realmIndex = slea.readInt(); // realm index
@@ -96,6 +100,27 @@ public final class RealmVerifyHandler implements BasicRealmHandler {
 		}
 		byte[] K_bytes = BigIntegers.asUnsignedByteArray(K);
 		System.out.println(DatatypeConverter.printHexBinary(K_bytes));
+		// Check the digest
+		MessageDigest md;
+		try {
+			md = MessageDigest.getInstance("SHA-1");
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException(e);
+		}
+		md.update(username.getBytes(StandardCharsets.US_ASCII));
+		md.update(new byte[4]);
+		md.update(clientSeed);
+		Random r = new Random(1337);
+		byte[] authSeed = new byte[4];
+		r.nextBytes(authSeed);
+		md.update(authSeed); // TODO Testing only
+		md.update(K_bytes);
+		byte[] serverDigest = md.digest();
+		if (!Arrays.equals(serverDigest, digest)) {
+			LOGGER.warn("Server Client Digest Mismatch!");
+			channel.close();
+			return;
+		}
 		// TODO Initialize encryption (RC4)
 		Cipher clientDecryptCipher = CryptoUtil.createRC4Cipher(false, K);
 		Cipher serverEncryptCipher = CryptoUtil.createRC4Cipher(true, K);
