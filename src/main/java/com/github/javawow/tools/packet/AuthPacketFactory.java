@@ -34,10 +34,9 @@ public final class AuthPacketFactory {
 		// static utility class
 	}
 
-	public static byte[] getLoginChallenge(BigInteger B, BigInteger g, BigInteger N, byte[] s, byte[] versionChallenge,
+	public static ByteBufWoWPacket getLoginChallenge(BigInteger B, BigInteger g, BigInteger N, byte[] s, byte[] versionChallenge,
 			byte securityFlags) {
-		LittleEndianWriterStream lew = new LittleEndianWriterStream();
-		lew.write(0); // AUTH_LOGON_CHALLENGE
+		LittleEndianWriterStream lew = new LittleEndianWriterStream(0); // AUTH_LOGON_CHALLENGE
 		lew.write(0); // ?
 		lew.write(0); // WOW_SUCCESS
 		lew.write(BitTools.toLEByteArray(B, 32));
@@ -64,19 +63,18 @@ public final class AuthPacketFactory {
 		if ((securityFlags & 0x4) == 0x4) {
 			lew.write(1);
 		}
-		return lew.toByteArray();
+		return lew.getPacket();
 	}
 
-	public static byte[] getLoginProof(BigInteger m2) {
-		LittleEndianWriterStream lew = new LittleEndianWriterStream();
-		lew.write(1); // AUTH_LOGON_PROOF
+	public static ByteBufWoWPacket getLoginProof(BigInteger m2) {
+		LittleEndianWriterStream lew = new LittleEndianWriterStream(1); // AUTH_LOGON_PROOF
 		lew.write(0); // error
 		lew.write(BitTools.toByteArray(m2, 20));
 		int accountFlag = 0x00800000; // 0x01 = GM, 0x08 = Trial, 0x00800000 = Pro pass (arena tournament)
 		lew.writeInt(accountFlag);
 		lew.writeInt(0); // SurveyId
 		lew.writeShort(0); // LoginFlags
-		return lew.toByteArray();
+		return lew.getPacket();
 	}
 
 	/**
@@ -86,15 +84,14 @@ public final class AuthPacketFactory {
 	 * @param versionChallenge ?
 	 * @return The packet
 	 */
-	public static byte[] getReconnectChallenge(byte[] salt, byte[] versionChallenge) {
+	public static ByteBufWoWPacket getReconnectChallenge(byte[] salt, byte[] versionChallenge) {
 		if (salt.length != 16) {
 			throw new IllegalArgumentException("random bytes must be length 16");
 		}
-		LittleEndianWriterStream lew = new LittleEndianWriterStream();
-		lew.write(2); // AUTH_RECONNECT_CHALLENGE
+		LittleEndianWriterStream lew = new LittleEndianWriterStream(2); // AUTH_RECONNECT_CHALLENGE
 		lew.write(0); // WOW_SUCCESS
 		lew.write(salt);
 		lew.write(versionChallenge);
-		return lew.toByteArray();
+		return lew.getPacket();
 	}
 }

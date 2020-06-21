@@ -21,29 +21,38 @@ package com.github.javawow.data.output;
 import java.io.ByteArrayOutputStream;
 
 import com.github.javawow.tools.HexTool;
+import com.github.javawow.tools.packet.ByteBufWoWPacket;
+
+import io.netty.buffer.Unpooled;
 
 /**
  * @author Jon
  *
  */
 public class LittleEndianWriterStream extends GenericLittleEndianWriter {
+	private int opcode;
 	private ByteArrayOutputStream baos;
 
-	public LittleEndianWriterStream() {
-		this(32);
+	public LittleEndianWriterStream(int opcode) {
+		this(opcode, 32);
 	}
 
-	public LittleEndianWriterStream(int size) {
+	public LittleEndianWriterStream(int opcode, int size) {
+		this.opcode = opcode;
 		this.baos = new ByteArrayOutputStream(size);
 		setByteOutputStream(new ByteArrayOutputByteStream(baos));
 	}
 
-	public final byte[] toByteArray() {
-		return baos.toByteArray();
-	}
+//	public final byte[] toByteArray() {
+//		return baos.toByteArray();
+//	}
 
-	public final int size() {
-		return baos.size();
+//	public final int size() {
+//		return baos.size();
+//	}
+
+	public final ByteBufWoWPacket getPacket() {
+		return new ByteBufWoWPacket(opcode, Unpooled.wrappedBuffer(baos.toByteArray()));
 	}
 
 	@Override

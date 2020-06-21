@@ -18,7 +18,6 @@
 
 package com.github.javawow.auth.handler;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 
@@ -29,7 +28,6 @@ import org.slf4j.LoggerFactory;
 
 import com.github.javawow.auth.AuthServer;
 import com.github.javawow.auth.message.LoginRequestMessage;
-import com.github.javawow.tools.FileUtil;
 import com.github.javawow.tools.RandomUtil;
 import com.github.javawow.tools.packet.AuthPacketFactory;
 import com.github.javawow.tools.srp.WoWSRP6Server;

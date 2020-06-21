@@ -20,15 +20,17 @@ package com.github.javawow.realm;
 
 import javax.crypto.Cipher;
 
+import com.github.javawow.tools.packet.ByteBufWoWPacket;
+
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 import io.netty.util.AttributeKey;
 
 @Sharable
-public final class RealmEncoder extends MessageToByteEncoder<byte[]> {
+public final class RealmEncoder extends MessageToByteEncoder<ByteBufWoWPacket> {
 	private static final RealmEncoder INSTANCE = new RealmEncoder();
 	public static final AttributeKey<Cipher> ENCRYPT_CIPHER_KEY = AttributeKey.newInstance("RC4_CIPHER_ENCRYPT");
 
@@ -41,18 +43,47 @@ public final class RealmEncoder extends MessageToByteEncoder<byte[]> {
 	}
 
 	@Override
-	protected void encode(ChannelHandlerContext ctx, byte[] msg, ByteBuf out) throws Exception {
-		Cipher encryptCipher = ctx.channel().attr(ENCRYPT_CIPHER_KEY).get();
-		if (encryptCipher == null) {
-			// Encryption has not started yet, write the packets plain
-			out.writeShort(msg.length);
-			out.writeBytes(msg);
-		} else {
-			// Encryption is active, therefore the header must be encrypted
-			ByteBuf encHeaderBuf = Unpooled.buffer(2, 3);
-			encryptCipher.doFinal(msg, 0, 2, encHeaderBuf.array(), 0);
-			out.writeBytes(encHeaderBuf);
-			out.writeBytes(msg, 2, msg.length - 2);
+	protected void encode(ChannelHandlerContext ctx, ByteBufWoWPacket msg, ByteBuf out) throws Exception {
+		// Header Format:
+		// Size (Big Endian) (Variable: 2-3 bytes)
+		// Opcode (Little Endian) (2 bytes)
+		// Length can be 4 (short packet) or 5 (long packet)
+		ByteBuf headerBuf = ctx.alloc().heapBuffer(4, 5); // Must be kept a heap buffer since we call array()
+		try {
+			ByteBuf payload = msg.getPayload();
+			int packetLength = payload.readableBytes() + 2; // payload size + size of the opcode
+			if (packetLength > 0x7FFF) { // outside the range of a signed short, we write 24-bits instead
+				int lengthMask = packetLength | 0x00800000; // The sign bit on the medium is set to indicate this is a
+															// 24-bits value to the client
+				headerBuf.writeMedium(lengthMask);
+			} else {
+				headerBuf.writeShort(packetLength);
+			}
+			headerBuf.writeShortLE(msg.getOpCode());
+			// Determine if the cipher is set and we need to encrypt the header or not
+			Cipher encryptCipher = ctx.channel().attr(ENCRYPT_CIPHER_KEY).get();
+			if (encryptCipher == null) {
+				// Encryption has not started yet, write the header plain
+				out.writeBytes(headerBuf);
+			} else {
+				// Encryption is active, therefore the header must be encrypted
+				int headerSize = headerBuf.readableBytes();
+//				System.out.println("Header Size: " + headerSize);
+				ByteBuf encHeaderBuf = ctx.alloc().heapBuffer(headerSize, headerSize);
+				try {
+					headerBuf.readBytes(encHeaderBuf, 0, headerSize);
+					int encryptLen = encryptCipher.doFinal(headerBuf.array(), 0, headerSize, encHeaderBuf.array(), 0);
+					encHeaderBuf.writerIndex(encryptLen); // increment writer index by number of bytes we written
+//					System.out.println("Encrypt Header Buffer:\n" + ByteBufUtil.prettyHexDump(encHeaderBuf));
+					out.writeBytes(encHeaderBuf);
+				} finally {
+					encHeaderBuf.release();
+				}
+			}
+			// Write the rest of the packet payload
+			out.writeBytes(payload);
+		} finally {
+			headerBuf.release();
 		}
 	}
 }

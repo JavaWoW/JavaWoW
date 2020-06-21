@@ -43,8 +43,7 @@ public final class RealmListRequestHandler implements BasicAuthHandler<Realmlist
 
 	@Override
 	public final void handleMessage(Channel channel, RealmlistRequestMessage msg) {
-		LittleEndianWriterStream lews = new LittleEndianWriterStream();
-		lews.write(0x10); // header
+		LittleEndianWriterStream lews = new LittleEndianWriterStream(16);
 		lews.writeShort(77); // size of entire packet
 		lews.writeInt(0); // ?
 		lews.writeShort(2); // number of realms
@@ -70,6 +69,6 @@ public final class RealmListRequestHandler implements BasicAuthHandler<Realmlist
 		lews.write(1);
 		// end
 		lews.writeShort(0x10);
-		channel.writeAndFlush(lews.toByteArray());
+		channel.writeAndFlush(lews.getPacket());
 	}
 }

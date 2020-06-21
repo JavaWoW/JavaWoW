@@ -18,6 +18,7 @@
 
 package com.github.javawow.realm;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -59,22 +60,21 @@ final class RealmServerHandler extends ChannelInboundHandlerAdapter {
 	@Override
 	public final void channelActive(ChannelHandlerContext ctx) throws Exception {
 		LOGGER.info("IoSession opened with {}.", ctx.channel().remoteAddress());
-		// Send Authentication Challenge Packet:
-		LittleEndianWriterStream lews = new LittleEndianWriterStream();
-		lews.writeShort(0x01EC); // header
-		lews.writeInt(1); // ?
-		int authSeed = 1337;
-		lews.writeInt(authSeed); // auth seed
-		System.out.println("auth seed: " + authSeed);
 		Random r = new Random(1337);
+		// Send Authentication Challenge Packet:
+		LittleEndianWriterStream lews = new LittleEndianWriterStream(0x01EC);
+		lews.writeInt(1); // ?
+		byte[] authSeed = new byte[4];
 		byte[] seed1 = new byte[16];
 		byte[] seed2 = new byte[16];
+		r.nextBytes(authSeed);
 		r.nextBytes(seed1);
 		r.nextBytes(seed2);
+		System.out.println("auth seed: " + Arrays.toString(authSeed));
+		lews.write(authSeed); // auth seed
 		lews.write(seed1); // ?
 		lews.write(seed2); // ?
-		LOGGER.debug("Packet Length: {}", lews.toByteArray().length);
-		ctx.channel().writeAndFlush(lews.toByteArray());
+		ctx.channel().writeAndFlush(lews.getPacket());
 		LOGGER.debug("Sent Authentication Challenge");
 	}
 

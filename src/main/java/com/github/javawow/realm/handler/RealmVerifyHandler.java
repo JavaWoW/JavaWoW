@@ -94,13 +94,11 @@ public final class RealmVerifyHandler implements BasicRealmHandler {
 		
 		boolean error = true;
 		if (error) {
-			LittleEndianWriterStream lews = new LittleEndianWriterStream();
-			lews.writeShort(0x01EE); // header
+			LittleEndianWriterStream lews = new LittleEndianWriterStream(0x01EE);
 			lews.write(13); // code (success/error)
-			channel.writeAndFlush(lews.toByteArray());
+			channel.writeAndFlush(lews.getPacket());
 		} else {
-			LittleEndianWriterStream lews = new LittleEndianWriterStream();
-			lews.writeShort(0x01EE); // header
+			LittleEndianWriterStream lews = new LittleEndianWriterStream(0x01EE);
 			lews.write(12); // code (success/error)
 			lews.writeInt(0); // BillingTimeRemaining
 			lews.write(0); // BillingPlanFlags
@@ -111,7 +109,7 @@ public final class RealmVerifyHandler implements BasicRealmHandler {
 			lews.writeInt(1); // Queue position
 			lews.write(0); // Realm has a free character migration - bool
 			// end queue information
-			channel.writeAndFlush(lews.toByteArray());
+			channel.writeAndFlush(lews.getPacket());
 		}
 	}
 }

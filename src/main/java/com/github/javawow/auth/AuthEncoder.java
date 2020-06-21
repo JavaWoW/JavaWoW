@@ -18,13 +18,15 @@
 
 package com.github.javawow.auth;
 
+import com.github.javawow.tools.packet.ByteBufWoWPacket;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 
 @Sharable
-final class AuthEncoder extends MessageToByteEncoder<byte[]> {
+final class AuthEncoder extends MessageToByteEncoder<ByteBufWoWPacket> {
 //	private static final Logger LOGGER = LoggerFactory.getLogger(AuthEncoder.class);
 	private static final AuthEncoder INSTANCE = new AuthEncoder();
 
@@ -37,7 +39,8 @@ final class AuthEncoder extends MessageToByteEncoder<byte[]> {
 	}
 
 	@Override
-	protected void encode(ChannelHandlerContext ctx, byte[] msg, ByteBuf out) throws Exception {
-		out.writeBytes(msg);
+	protected void encode(ChannelHandlerContext ctx, ByteBufWoWPacket msg, ByteBuf out) throws Exception {
+		out.writeByte(msg.getOpCode());
+		out.writeBytes(msg.getPayload());
 	}
 }

@@ -31,6 +31,8 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.ShortBufferException;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.bouncycastle.util.BigIntegers;
+
 /**
  * WoW Cryptographic Utilities.
  * 
@@ -94,7 +96,7 @@ public final class CryptoUtil {
 	 */
 	public static final Cipher createRC4Cipher(boolean encrypt, BigInteger K) {
 		Objects.requireNonNull(K, "session key cannot be null");
-		byte[] sessionKey = BitTools.toLEByteArray(K);
+		byte[] sessionKey = BigIntegers.asUnsignedByteArray(K);
 		byte[] key;
 		// Generate the RC4 cipher key using the SRP-6a session key
 		if (encrypt) {
@@ -119,7 +121,10 @@ public final class CryptoUtil {
 		}
 		// Drop the first 1024 bytes, as WoW uses RC4-drop1024
 		try {
-			cipher.doFinal(ZEROES, 0, 1024, DROPPED, 0);
+			int droppedLen = cipher.doFinal(ZEROES, 0, 1024, DROPPED, 0);
+			if (droppedLen != 1024) {
+				throw new RuntimeException("unable to drop 1024 bytes from RC4");
+			}
 		} catch (IllegalBlockSizeException | BadPaddingException | ShortBufferException e) {
 			// should never happen
 			throw new RuntimeException(e);
