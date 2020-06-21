@@ -18,19 +18,35 @@
 
 package com.github.javawow.auth.handler;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.github.javawow.auth.AuthServer;
 import com.github.javawow.auth.message.ReconnectProofMessage;
 
 import io.netty.channel.Channel;
 
 public final class ReconnectVerifyHandler implements BasicAuthHandler<ReconnectProofMessage> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ReconnectVerifyHandler.class);
+	private static final ReconnectVerifyHandler INSTANCE = new ReconnectVerifyHandler();
+
+	private ReconnectVerifyHandler() {
+		// singleton
+	}
+
+	public static final ReconnectVerifyHandler getInstance() {
+		return INSTANCE;
+	}
+
 	@Override
 	public final boolean hasValidState(Channel channel) {
-		return true;
+		return channel.attr(AuthServer.SRP_ATTR).get() != null;
 	}
 
 	@Override
 	public final void handleMessage(Channel channel, ReconnectProofMessage msg) {
-		// TODO Auto-generated method stub
-
+		msg.getR1();
+		msg.getR2();
+		msg.getR3();
 	}
 }

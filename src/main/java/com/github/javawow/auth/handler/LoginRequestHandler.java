@@ -27,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.javawow.auth.AuthServer;
-import com.github.javawow.auth.AuthState;
 import com.github.javawow.auth.message.LoginRequestMessage;
 import com.github.javawow.tools.RandomUtil;
 import com.github.javawow.tools.packet.AuthPacketFactory;
@@ -39,9 +38,9 @@ import io.netty.channel.Channel;
 public final class LoginRequestHandler implements BasicAuthHandler<LoginRequestMessage> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(LoginRequestHandler.class);
 	private static final LoginRequestHandler INSTANCE = new LoginRequestHandler();
-	public static final BigInteger N = new BigInteger(
+	private static final BigInteger N = new BigInteger(
 			"894B645E89E1535BBDAD5B8B290650530801B18EBFBF5E8FAB3C82872A3E9BB7", 16);
-	public static final BigInteger g = BigInteger.valueOf(7);
+	private static final BigInteger g = BigInteger.valueOf(7);
 	public static final byte[] VERSION_CHALLENGE = { (byte) 0xBA, (byte) 0xA3, 0x1E, (byte) 0x99, (byte) 0xA0, 0x0B,
 			0x21, 0x57, (byte) 0xFC, 0x37, 0x3F, (byte) 0xB3, 0x69, (byte) 0xCD, (byte) 0xD2, (byte) 0xF1 };
 	private static final SRP6GroupParameters params = new SRP6GroupParameters(N, g);
@@ -76,12 +75,13 @@ public final class LoginRequestHandler implements BasicAuthHandler<LoginRequestM
 		WoWSRP6VerifierGenerator gen = new WoWSRP6VerifierGenerator();
 		gen.init(params, new SHA1Digest());
 		BigInteger v = gen.generateVerifier(s, I, p); // generate v
+		// Store v (verifier) and s (salt) in the database
+		
 		WoWSRP6Server srp = WoWSRP6Server.init(params, v, I, s, new SHA1Digest(), RandomUtil.getSecureRandom());
 		BigInteger B = srp.generateServerCredentials(); // generate B
 		// Set client values
 		channel.attr(AuthServer.SRP_ATTR).set(srp);
-		channel.attr(AuthState.ATTRIBUTE_KEY).set(AuthState.IDENTIFIED);
 		// Now we have B, g, N, s (send it here)
-		channel.writeAndFlush(AuthPacketFactory.getLoginChallenge(B, v, B, s, VERSION_CHALLENGE, (byte) 0));
+		channel.writeAndFlush(AuthPacketFactory.getLoginChallenge(B, g, N, s, VERSION_CHALLENGE, (byte) 0));
 	}
 }

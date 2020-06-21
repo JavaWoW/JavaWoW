@@ -18,6 +18,8 @@
 
 package com.github.javawow.auth.message;
 
+import java.util.Objects;
+
 import com.google.errorprone.annotations.Immutable;
 
 /**
@@ -34,6 +36,18 @@ public final class ReconnectProofMessage {
 	private final byte numKeys; // number of keys
 
 	public ReconnectProofMessage(byte[] r1, byte[] r2, byte[] r3, byte numKeys) {
+		Objects.requireNonNull(r1, "r1 must not be null");
+		Objects.requireNonNull(r2, "r2 must not be null");
+		Objects.requireNonNull(r3, "r3 must not be null");
+		if (r1.length != 16) {
+			throw new IllegalArgumentException("r1 must be length 16");
+		}
+		if (r2.length != 20) {
+			throw new IllegalArgumentException("r2 must be length 20");
+		}
+		if (r3.length != 20) {
+			throw new IllegalArgumentException("r3 must be length 20");
+		}
 		this.R1 = r1;
 		this.R2 = r2;
 		this.R3 = r3;

@@ -28,9 +28,13 @@ import com.github.javawow.auth.handler.BasicAuthHandler;
 import com.github.javawow.auth.handler.LoginRequestHandler;
 import com.github.javawow.auth.handler.LoginVerifyHandler;
 import com.github.javawow.auth.handler.RealmListRequestHandler;
+import com.github.javawow.auth.handler.ReconnectRequestHandler;
+import com.github.javawow.auth.handler.ReconnectVerifyHandler;
 import com.github.javawow.auth.message.LoginProofMessage;
 import com.github.javawow.auth.message.LoginRequestMessage;
 import com.github.javawow.auth.message.RealmlistRequestMessage;
+import com.github.javawow.auth.message.ReconnectProofMessage;
+import com.github.javawow.auth.message.ReconnectRequestMessage;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
@@ -46,6 +50,8 @@ final class AuthServerHandler extends ChannelInboundHandlerAdapter {
 	static {
 		handlers.put(LoginRequestMessage.class, LoginRequestHandler.getInstance());
 		handlers.put(LoginProofMessage.class, LoginVerifyHandler.getInstance());
+		handlers.put(ReconnectRequestMessage.class, ReconnectRequestHandler.getInstance());
+		handlers.put(ReconnectProofMessage.class, ReconnectVerifyHandler.getInstance());
 		handlers.put(RealmlistRequestMessage.class, RealmListRequestHandler.getInstance());
 	}
 

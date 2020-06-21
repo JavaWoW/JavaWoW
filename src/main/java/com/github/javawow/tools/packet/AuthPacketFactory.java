@@ -79,14 +79,21 @@ public final class AuthPacketFactory {
 		return lew.toByteArray();
 	}
 
-	public static byte[] getReconnectChallenge(byte[] random, byte[] versionChallenge) {
-		if (random.length != 16) {
+	/**
+	 * ClientLink::CMD_AUTH_LOGON_CHALLENGE (008CC3E0)
+	 * 
+	 * @param salt             Random salt (must be length 16)
+	 * @param versionChallenge ?
+	 * @return The packet
+	 */
+	public static byte[] getReconnectChallenge(byte[] salt, byte[] versionChallenge) {
+		if (salt.length != 16) {
 			throw new IllegalArgumentException("random bytes must be length 16");
 		}
 		LittleEndianWriterStream lew = new LittleEndianWriterStream();
 		lew.write(2); // AUTH_RECONNECT_CHALLENGE
 		lew.write(0); // WOW_SUCCESS
-		lew.write(random);
+		lew.write(salt);
 		lew.write(versionChallenge);
 		return lew.toByteArray();
 	}

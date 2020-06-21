@@ -27,6 +27,8 @@ import org.slf4j.LoggerFactory;
 import com.github.javawow.auth.message.LoginProofMessage;
 import com.github.javawow.auth.message.LoginRequestMessage;
 import com.github.javawow.auth.message.RealmlistRequestMessage;
+import com.github.javawow.auth.message.ReconnectProofMessage;
+import com.github.javawow.auth.message.ReconnectRequestMessage;
 import com.github.javawow.tools.BitTools;
 
 import io.netty.buffer.ByteBuf;
@@ -35,25 +37,18 @@ import io.netty.handler.codec.ByteToMessageDecoder;
 
 final class AuthDecoder extends ByteToMessageDecoder {
 	private static final Logger LOG = LoggerFactory.getLogger(AuthDecoder.class);
-	private static final int[] PACKET_LENGTHS = new int[AuthState.values().length];
-
-	static {
-		PACKET_LENGTHS[AuthState.UNAUTHENTICATED.ordinal()] = 40; // The initial SRP-6a I payload is length 40
-		PACKET_LENGTHS[AuthState.IDENTIFIED.ordinal()] = 75; // The SRP-6a A and M1 payload is length 75
-		PACKET_LENGTHS[AuthState.AUTHENTICATED.ordinal()] = 0; // TODO Not sure
-	}
 
 	AuthDecoder() {
 		// keep it package-private
 	}
 
 	@Override
-	protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
+	protected final void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
 		// Mark reader index in case we need to restore
 		in.markReaderIndex();
 		// Read the command byte
 		byte cmd = in.readByte();
-		if (cmd == 0x0 || cmd == 0x2) { // login request / reconnect request
+		if (cmd == 0x0) { // ClientLink::CMD_AUTH_LOGON_CHALLENGE (008CC3E0)
 			// initial length is 33
 			if (in.readableBytes() < 33) {
 				// not enough data to decode
@@ -90,7 +85,8 @@ final class AuthDecoder extends ByteToMessageDecoder {
 			}
 			byte[] i = new byte[iLength];
 			in.readBytes(i);
-			out.add(new LoginRequestMessage(error, size, gamename, majorVersion, minorVersion, patchVersion, build, arch, os, locale, timezone, ip, iLength, i));
+			out.add(new LoginRequestMessage(error, size, gamename, majorVersion, minorVersion, patchVersion, build,
+					arch, os, locale, timezone, ip, iLength, i));
 		} else if (cmd == 0x1) { // login verification
 			if (in.readableBytes() < 74) {
 				// not enough data to decode
@@ -109,6 +105,45 @@ final class AuthDecoder extends ByteToMessageDecoder {
 			BigInteger a = BitTools.toBigInteger(A_bytes, true);
 			BigInteger m1 = BitTools.toBigInteger(M1_bytes, false);
 			out.add(new LoginProofMessage(a, m1, crcHash, numKeys, securityFlags));
+		} else if (cmd == 0x2) { // reconnect request
+			// initial length is 33
+			if (in.readableBytes() < 33) {
+				// not enough data to decode
+				// reset reader index
+				in.resetReaderIndex();
+				return;
+			}
+			byte error = in.readByte();
+			short size = in.readShortLE();
+			byte[] gamename = new byte[4];
+			in.readBytes(gamename);
+			BitTools.reverseBuffer(gamename);
+			byte majorVersion = in.readByte();
+			byte minorVersion = in.readByte();
+			byte patchVersion = in.readByte();
+			short build = in.readShortLE();
+			byte[] arch = new byte[4];
+			in.readBytes(arch);
+			BitTools.reverseBuffer(arch);
+			byte[] os = new byte[4];
+			in.readBytes(os);
+			BitTools.reverseBuffer(os);
+			byte[] locale = new byte[4];
+			in.readBytes(locale);
+			locale = BitTools.reverse(locale);
+			int timezone = in.readIntLE();
+			int ip = in.readIntLE();
+			byte iLength = in.readByte();
+			if (in.readableBytes() < iLength) {
+				// not enough data to decode
+				// reset reader index
+				in.resetReaderIndex();
+				return;
+			}
+			byte[] i = new byte[iLength];
+			in.readBytes(i);
+			out.add(new ReconnectRequestMessage(error, size, gamename, majorVersion, minorVersion, patchVersion, build,
+					arch, os, locale, timezone, ip, iLength, i));
 		} else if (cmd == 0x3) { // reconnect proof
 			if (in.readableBytes() < 57) {
 				// not enough data to decode
@@ -116,7 +151,14 @@ final class AuthDecoder extends ByteToMessageDecoder {
 				in.resetReaderIndex();
 				return;
 			}
-			LOG.info("Unhandled Command: " + cmd);
+			byte[] R1 = new byte[16];
+			byte[] R2 = new byte[20];
+			byte[] R3 = new byte[20];
+			in.readBytes(R1, 0, R1.length); // little-endian order
+			in.readBytes(R2, 0, R2.length);
+			in.readBytes(R3, 0, R3.length);
+			byte numKeys = in.readByte();
+			out.add(new ReconnectProofMessage(R1, R2, R3, numKeys));
 		} else if (cmd == 0x10) { // realm list request
 			int unk = in.readInt();
 			out.add(new RealmlistRequestMessage(unk));

@@ -19,6 +19,7 @@
 package com.github.javawow.tools;
 
 import java.security.SecureRandom;
+import java.util.Random;
 
 /**
  * Provides cryptographically secure RNGs and PRNGs.
@@ -27,6 +28,7 @@ import java.security.SecureRandom;
  *
  */
 public final class RandomUtil {
+	private static final Random r = new Random();
 	private static final SecureRandom sr = new SecureRandom();
 
 	private RandomUtil() {
@@ -35,5 +37,9 @@ public final class RandomUtil {
 
 	public static final SecureRandom getSecureRandom() {
 		return sr;
+	}
+
+	public static final Random getRandom() {
+		return r;
 	}
 }
