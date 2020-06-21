@@ -55,8 +55,8 @@ public final class BitTools {
 	 */
 	public static final byte[] reverse(byte[] arr) {
 		byte[] ret = new byte[arr.length];
-		for (int i = (arr.length - 1), c = 0; i >= 0; i--) {
-			ret[c++] = arr[i];
+		for (int i = (arr.length - 1), j = 0; i >= 0; i--, j++) {
+			ret[j] = arr[i];
 		}
 		return ret;
 	}
@@ -80,8 +80,8 @@ public final class BitTools {
 			newLength = b.length;
 		}
 		byte[] ret = new byte[newLength];
-		for (int i = (b.length - 1), c = 0, end = ignoreMSB ? 1 : 0; i >= end; i--) {
-			ret[c++] = b[i];
+		for (int i = (b.length - 1), j = 0, end = ignoreMSB ? 1 : 0; i >= end; i--, j++) {
+			ret[j] = b[i];
 		}
 		return ret;
 	}
@@ -108,8 +108,8 @@ public final class BitTools {
 		}
 		newLength = Math.max(newLength, minSize); // if minSize > length, set length = minSize
 		byte[] ret = new byte[newLength];
-		for (int i = (b.length - 1), c = 0, end = ignoreMSB ? 1 : 0; i >= end; i--) {
-			ret[c++] = b[i];
+		for (int i = (b.length - 1), j = 0, end = ignoreMSB ? 1 : 0; i >= end; i--, j++) {
+			ret[j] = b[i];
 		}
 		return ret;
 	}
@@ -157,8 +157,8 @@ public final class BitTools {
 			System.arraycopy(buf, 0, arr, 0, length);
 			return new BigInteger(1, arr); // big-endian byte order
 		}
-		for (int i = (length - 1), c = 0; i >= 0; i--) {
-			arr[c++] = buf[i];
+		for (int i = (length - 1), j = 0; i >= 0; i--, j++) {
+			arr[j] = buf[i];
 		}
 		return new BigInteger(1, arr); // little-endian byte order
 	}
@@ -177,8 +177,8 @@ public final class BitTools {
 			return new BigInteger(1, arr); // big-endian byte order
 		}
 		byte[] reverse = new byte[arr.length];
-		for (int i = (arr.length - 1), c = 0; i >= 0; i--) {
-			reverse[c++] = arr[i];
+		for (int i = (arr.length - 1), j = 0; i >= 0; i--, j++) {
+			reverse[j] = arr[i];
 		}
 		return new BigInteger(1, reverse); // little-endian byte order
 	}

@@ -20,6 +20,7 @@ package com.github.javawow.auth.handler;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.util.Random;
 
 import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.params.SRP6GroupParameters;
@@ -71,7 +72,9 @@ public final class LoginRequestHandler implements BasicAuthHandler<LoginRequestM
 		// Step 2 : Server responds with B, g, N, s
 		byte[] p = "lolwtf".toUpperCase().getBytes(); // p (kept secret throughout)
 		byte[] s = new byte[32]; // salt (s)
-		RandomUtil.getSecureRandom().nextBytes(s);
+		Random rand = new Random(1337);
+		rand.nextBytes(s);
+//		RandomUtil.getSecureRandom().nextBytes(s);
 		WoWSRP6VerifierGenerator gen = new WoWSRP6VerifierGenerator();
 		gen.init(params, new SHA1Digest());
 		BigInteger v = gen.generateVerifier(s, I, p); // generate v

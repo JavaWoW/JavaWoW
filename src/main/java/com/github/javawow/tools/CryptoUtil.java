@@ -23,9 +23,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.ShortBufferException;
@@ -114,18 +112,18 @@ public final class CryptoUtil {
 		}
 		SecretKeySpec keySpec = new SecretKeySpec(key, RC4_ALGORITHM);
 		try {
-			cipher.init(encrypt ? Cipher.ENCRYPT_MODE : Cipher.DECRYPT_MODE, keySpec);
+			cipher.init(Cipher.ENCRYPT_MODE, keySpec);
 		} catch (InvalidKeyException e) {
 			// should never happen
 			throw new RuntimeException(e);
 		}
 		// Drop the first 1024 bytes, as WoW uses RC4-drop1024
 		try {
-			int droppedLen = cipher.doFinal(ZEROES, 0, 1024, DROPPED, 0);
+			int droppedLen = cipher.update(ZEROES, 0, 1024, DROPPED, 0);
 			if (droppedLen != 1024) {
 				throw new RuntimeException("unable to drop 1024 bytes from RC4");
 			}
-		} catch (IllegalBlockSizeException | BadPaddingException | ShortBufferException e) {
+		} catch (ShortBufferException e) {
 			// should never happen
 			throw new RuntimeException(e);
 		}

@@ -23,7 +23,6 @@ import javax.crypto.Cipher;
 import com.github.javawow.tools.packet.ByteBufWoWPacket;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
@@ -72,7 +71,7 @@ public final class RealmEncoder extends MessageToByteEncoder<ByteBufWoWPacket> {
 				ByteBuf encHeaderBuf = ctx.alloc().heapBuffer(headerSize, headerSize);
 				try {
 					headerBuf.readBytes(encHeaderBuf, 0, headerSize);
-					int encryptLen = encryptCipher.doFinal(headerBuf.array(), 0, headerSize, encHeaderBuf.array(), 0);
+					int encryptLen = encryptCipher.update(headerBuf.array(), 0, headerSize, encHeaderBuf.array(), 0);
 					encHeaderBuf.writerIndex(encryptLen); // increment writer index by number of bytes we written
 //					System.out.println("Encrypt Header Buffer:\n" + ByteBufUtil.prettyHexDump(encHeaderBuf));
 					out.writeBytes(encHeaderBuf);

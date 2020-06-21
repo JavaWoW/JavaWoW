@@ -65,6 +65,12 @@ public final class RealmVerifyHandler implements BasicRealmHandler {
 		int realmIndex = slea.readInt(); // realm index
 		long dosResponse = slea.readLong(); // unk4
 		byte[] digest = slea.read(20);
+		byte[] addonInfo;
+		if (slea.available() > 0) {
+			addonInfo = slea.read(slea.available());
+		} else {
+			addonInfo = new byte[0];
+		}
 		System.out.println("Build Number: " + buildNumber);
 		System.out.println("Server ID: " + serverId);
 		System.out.println("Username: " + username);
@@ -75,7 +81,8 @@ public final class RealmVerifyHandler implements BasicRealmHandler {
 		System.out.println("Realm Index: " + realmIndex);
 		System.out.println("DosResponse: " + dosResponse);
 		System.out.println("Digest: " + Arrays.toString(digest));
-		LOGGER.info(slea.toString());
+		System.out.println("AddOn Info: " + Arrays.toString(addonInfo));
+//		LOGGER.info(slea.toString());
 		// Read session key from the DB
 		BigInteger K;
 		try {

@@ -162,11 +162,9 @@ public final class WoWSRP6Util extends SRP6Util {
 		byte[] S_even_bytes = new byte[16];
 		byte[] S_odd_bytes = new byte[16];
 		// Read in the even-indexed bytes
-		for (int i = 0, c = 0; i < 32; i += 2) {
-			S_even_bytes[c++] = S_le[i];
-		}
-		for (int i = 1, c = 0; i < 32; i += 2) {
-			S_odd_bytes[c++] = S_le[i];
+		for (int i = 0, j = 0; i < 32; i += 2, j++) {
+			S_even_bytes[j] = S_le[i];
+			S_odd_bytes[j] = S_le[i + 1];
 		}
 		digest.update(S_even_bytes, 0, S_even_bytes.length);
 		byte[] S_even_digested_bytes = new byte[digest.getDigestSize()];
@@ -175,13 +173,10 @@ public final class WoWSRP6Util extends SRP6Util {
 		byte[] S_odd_digested_bytes = new byte[digest.getDigestSize()];
 		digest.doFinal(S_odd_digested_bytes, 0);
 		byte[] K_bytes = new byte[digest.getDigestSize() * 2];
-		// copy the even-indexed bytes in
-		for (int i = 0, c = 0; i < 40; i += 2) {
-			K_bytes[i] = S_even_digested_bytes[c++];
-		}
-		// copy the odd-indexed bytes in
-		for (int i = 1, c = 0; i < 40; i += 2) {
-			K_bytes[i] = S_odd_digested_bytes[c++];
+		// copy the bytes in
+		for (int i = 0, j = 0; i < 40; i += 2, j++) {
+			K_bytes[i] = S_even_digested_bytes[j];
+			K_bytes[i + 1] = S_odd_digested_bytes[j];
 		}
 		return new BigInteger(1, K_bytes);
 	}

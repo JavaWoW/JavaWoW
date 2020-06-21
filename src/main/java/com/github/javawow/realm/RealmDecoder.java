@@ -69,7 +69,7 @@ public final class RealmDecoder extends ByteToMessageDecoder {
 			byte[] headerBuf = new byte[6]; // buffer to hold the decrypted header
 			try {
 				in.readBytes(encHeaderBuf);
-				int decryptLen = decryptCipher.doFinal(encHeaderBuf, 0, 6, headerBuf, 0);
+				int decryptLen = decryptCipher.update(encHeaderBuf, 0, 6, headerBuf, 0);
 				ByteBuf clientHeader = Unpooled.wrappedBuffer(headerBuf);
 				System.out.println("Decrypted Header:\n" + ByteBufUtil.prettyHexDump(clientHeader));
 				int packetLength = clientHeader.readShort();
