@@ -58,22 +58,16 @@ final class AuthDecoder extends ByteToMessageDecoder {
 			}
 			byte error = in.readByte();
 			short size = in.readShortLE();
-			byte[] gamename = new byte[4];
-			in.readBytes(gamename);
-			BitTools.reverseBuffer(gamename);
+			byte[] gamename = BitTools.readLECString(in, 4);
 			byte majorVersion = in.readByte();
 			byte minorVersion = in.readByte();
 			byte patchVersion = in.readByte();
 			short build = in.readShortLE();
-			byte[] arch = new byte[4];
-			in.readBytes(arch);
-			BitTools.reverseBuffer(arch);
-			byte[] os = new byte[4];
-			in.readBytes(os);
-			BitTools.reverseBuffer(os);
+			byte[] arch = BitTools.readLECString(in, 4);
+			byte[] os = BitTools.readLECString(in, 4);
 			byte[] locale = new byte[4];
 			in.readBytes(locale);
-			locale = BitTools.reverse(locale);
+			BitTools.reverseBuffer(locale);
 			int timezone = in.readIntLE();
 			int ip = in.readIntLE();
 			byte iLength = in.readByte();

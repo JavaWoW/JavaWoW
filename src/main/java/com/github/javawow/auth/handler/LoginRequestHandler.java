@@ -19,7 +19,6 @@
 package com.github.javawow.auth.handler;
 
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.util.Random;
 
 import org.bouncycastle.crypto.digests.SHA1Digest;
@@ -61,9 +60,9 @@ public final class LoginRequestHandler implements BasicAuthHandler<LoginRequestM
 
 	@Override
 	public final void handleMessage(Channel channel, LoginRequestMessage msg) {
-		String arch = new String(msg.getArch(), StandardCharsets.US_ASCII);
-		String os = new String(msg.getOs(), StandardCharsets.US_ASCII);
-		String locale = new String(msg.getLocale(), StandardCharsets.US_ASCII);
+		String arch = msg.getArch();
+		String os = msg.getOs();
+		String locale = msg.getLocale();
 		LOGGER.info("Arch: {} OS: {} Locale: {}", arch, os, locale);
 //		int timezone = msg.getTimezone();
 //		int ip = msg.getIp();

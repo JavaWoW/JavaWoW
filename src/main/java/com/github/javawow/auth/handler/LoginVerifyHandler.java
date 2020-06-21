@@ -101,7 +101,6 @@ public final class LoginVerifyHandler implements BasicAuthHandler<LoginProofMess
 			channel.close();
 			return;
 		}
-		LOGGER.info("K: {}", K.toString(16));
 		// Set client attributes
 		channel.attr(AuthState.ATTRIBUTE_KEY).set(AuthState.AUTHENTICATED);
 		// Send M2 to the client

@@ -19,6 +19,9 @@
 package com.github.javawow.tools;
 
 import java.math.BigInteger;
+import java.util.Objects;
+
+import io.netty.buffer.ByteBuf;
 
 /**
  * Provides operations for manipulating bits, byte arrays, and
@@ -33,17 +36,78 @@ public final class BitTools {
 	}
 
 	/**
+	 * Reads a little-endian C-string (null terminated string) from the given
+	 * {@code ByteBuf}.
+	 * 
+	 * @param buf The {@code ByteBuf} to read from
+	 * @return The little-endian C-string as a byte array
+	 */
+	public static final byte[] readLECString(ByteBuf buf) {
+		Objects.requireNonNull(buf, "buffer cannot be null");
+		buf.markReaderIndex();
+		int bytesBeforeNul = buf.bytesBefore((byte) 0);
+		byte[] dst = new byte[bytesBeforeNul];
+		buf.readBytes(dst);
+		reverseBuffer(dst, bytesBeforeNul);
+		return dst;
+	}
+
+	/**
+	 * Reads {@code length} bytes as characters from the given {@code ByteBuf} and
+	 * returns a string with the given result.
+	 * 
+	 * @param buf    The {@code ByteBuf} to read from
+	 * @param length The number of bytes to read (including the null terminator
+	 *               byte)
+	 * @return The C-string as a byte array
+	 */
+	public static final byte[] readLECString(ByteBuf buf, int length) {
+		Objects.requireNonNull(buf, "buffer cannot be null");
+		buf.markReaderIndex();
+		byte[] dst = new byte[length];
+		buf.readBytes(dst);
+		reverseBuffer(dst, length - 1);
+		if (dst[length - 1] != 0) {
+			buf.resetReaderIndex();
+			throw new IllegalStateException("last byte read is not null byte, it is: " + dst[length - 1]);
+		}
+		return dst;
+	}
+
+	/**
+	 * Performs a little-endian read from the given {@code ByteBuf} into the
+	 * destination byte array buffer.
+	 */
+	public static final void readLE(ByteBuf buf, byte[] destBuf) {
+		buf.readBytes(destBuf);
+		reverseBuffer(destBuf);
+	}
+
+	/**
 	 * Reverses the given byte array buffer in place. Please be aware this method
 	 * mutates the given byte array.
 	 * 
 	 * @param arr The byte array to reverse
 	 */
 	public static final void reverseBuffer(byte[] arr) {
-		for (int i = 0, n = arr.length / 2, lastIndex = arr.length - 1; i < n; i++) {
-			int otherIdx = lastIndex - i;
-			byte temp = arr[i];
-			arr[i] = arr[otherIdx];
-			arr[otherIdx] = temp;
+		for (int i = 0, j = arr.length - 1; j > i; i++, j--) {
+			byte tmp = arr[j];
+			arr[j] = arr[i];
+			arr[i] = tmp;
+		}
+	}
+
+	/**
+	 * Reverses the given byte array buffer in place using the length specifier.
+	 * Please be aware this method mutates the given byte array.
+	 * 
+	 * @param arr The byte array to reverse
+	 */
+	public static final void reverseBuffer(byte[] arr, int length) {
+		for (int i = 0, j = length - 1; j > i; i++, j--) {
+			byte tmp = arr[j];
+			arr[j] = arr[i];
+			arr[i] = tmp;
 		}
 	}
 
