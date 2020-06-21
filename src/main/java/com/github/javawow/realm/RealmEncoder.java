@@ -69,12 +69,12 @@ public final class RealmEncoder extends MessageToByteEncoder<ByteBufWoWPacket> {
 				// Encryption is active, therefore the header must be encrypted
 				int headerSize = headerBuf.readableBytes();
 //				System.out.println("Header Size: " + headerSize);
-				System.out.println("Plain Header:\n" + ByteBufUtil.prettyHexDump(headerBuf));
+//				System.out.println("Plain Header:\n" + ByteBufUtil.prettyHexDump(headerBuf));
 				ByteBuf encHeaderBuf = ctx.alloc().heapBuffer(headerSize, headerSize);
 				try {
 					headerBuf.readBytes(encHeaderBuf, 0, headerSize);
-					int encryptLen = encryptCipher.update(headerBuf.array(), 0, headerSize, encHeaderBuf.array(), 0);
-					encHeaderBuf.writerIndex(encryptLen); // increment writer index by number of bytes we written
+					int updateLen = encryptCipher.update(headerBuf.array(), headerBuf.arrayOffset(), headerSize, encHeaderBuf.array(), encHeaderBuf.arrayOffset());
+					encHeaderBuf.writerIndex(updateLen); // increment writer index by number of bytes we written
 //					System.out.println("Encrypt Header Buffer:\n" + ByteBufUtil.prettyHexDump(encHeaderBuf));
 					out.writeBytes(encHeaderBuf);
 				} finally {

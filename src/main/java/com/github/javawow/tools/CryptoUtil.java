@@ -28,7 +28,6 @@ import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.ShortBufferException;
 import javax.crypto.spec.SecretKeySpec;
-import javax.xml.bind.DatatypeConverter;
 
 import org.bouncycastle.util.BigIntegers;
 
@@ -85,7 +84,12 @@ public final class CryptoUtil {
 	}
 
 	/**
-	 * Creates an RC4 {@code Cipher} from the given SRP-6 session key (K)
+	 * Creates a WoW specific RC4-drop1024 {@code Cipher} from the given SRP-6
+	 * session key (K). It is suggested to use the
+	 * {@link Cipher#update(byte[], int, int, byte[], int)} method for
+	 * encryption/decryption. Do <b>not</b> perform a call to
+	 * {@link Cipher#doFinal()} or its variants as this will reset the internal
+	 * state of the RC-4 cipher.
 	 * 
 	 * @param encrypt {@code true} if the cipher is to be used for encryption
 	 *                (server-side), {@code false} if it is to be used for
@@ -103,7 +107,6 @@ public final class CryptoUtil {
 		} else {
 			key = decryptHMacSHA1(sessionKey);
 		}
-		System.out.println((encrypt ? "ENCRYPT" : "DECRYPT") + " RC4 Key: " + DatatypeConverter.printHexBinary(key));
 		// Create the RC4 cipher
 		Cipher cipher;
 		try {

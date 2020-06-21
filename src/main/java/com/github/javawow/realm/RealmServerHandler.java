@@ -36,6 +36,7 @@ import com.github.javawow.realm.handler.RealmVerifyHandler;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
+import io.netty.util.ReferenceCountUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
@@ -86,18 +87,22 @@ final class RealmServerHandler extends ChannelInboundHandlerAdapter {
 
 	@Override
 	public final void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-		SeekableLittleEndianAccessor slea = new GenericSeekableLittleEndianAccessor(new SeekableByteArrayStream(((ByteBuf) msg).array()));
-		short header = slea.readShort();
-		BasicRealmHandler handler = handlers.get(header);
-		if (handler != null) {
-			Channel ch = ctx.channel();
-			if (handler.hasValidState(ch)) {
-				handler.handlePacket(ch, slea);
+		try {
+			SeekableLittleEndianAccessor slea = new GenericSeekableLittleEndianAccessor(new SeekableByteArrayStream(((ByteBuf) msg).array()));
+			short header = slea.readShort();
+			BasicRealmHandler handler = handlers.get(header);
+			if (handler != null) {
+				Channel ch = ctx.channel();
+				if (handler.hasValidState(ch)) {
+					handler.handlePacket(ch, slea);
+				} else {
+					LOGGER.warn("Invalid state detected for handler: {}", handler.getClass().getName());
+				}
 			} else {
-				LOGGER.warn("Invalid state detected for handler: {}", handler.getClass().getName());
+				LOGGER.warn("Unhandled Packet. Header: 0x{}", Integer.toHexString(header));
 			}
-		} else {
-			LOGGER.warn("Unhandled Packet. Header: 0x{}", Integer.toHexString(header));
+		} finally {
+			ReferenceCountUtil.release(msg);
 		}
 	}
 

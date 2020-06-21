@@ -21,8 +21,6 @@ package com.github.javawow.tools.srp;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
-import javax.xml.bind.DatatypeConverter;
-
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.agreement.srp.SRP6Util;
@@ -118,7 +116,6 @@ public final class WoWSRP6Util extends SRP6Util {
 		digest.update(A_bytes, 0, A_bytes.length); // A
 		digest.update(B_bytes, 0, B_bytes.length); // B
 		digest.update(K_bytes, 0, K_bytes.length); // H( S )
-		System.out.println(DatatypeConverter.printHexBinary(K_bytes));
 		byte[] output = new byte[digest.getDigestSize()];
 		digest.doFinal(output, 0);
 		BigInteger M1 = new BigInteger(1, output);

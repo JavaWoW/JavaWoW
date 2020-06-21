@@ -52,7 +52,7 @@ public final class RealmDecoder extends ByteToMessageDecoder {
 		if (decryptCipher == null) {
 			// Encryption has not started yet, read the packets plain
 			int packetLength = in.readUnsignedShort();
-			System.out.println("Unencrypted Packet Length: " + packetLength);
+//			System.out.println("Unencrypted Packet Length: " + packetLength);
 			if (in.readableBytes() < packetLength) {
 				// still not enough data
 				in.resetReaderIndex();
@@ -69,7 +69,11 @@ public final class RealmDecoder extends ByteToMessageDecoder {
 			ByteBuf headerBuf = ctx.alloc().heapBuffer(6, 6); // buffer to hold the decrypted header
 			try {
 				in.readBytes(encHeaderBuf);
-				int decryptLen = decryptCipher.update(encHeaderBuf.array(), 0, 6, headerBuf.array(), 0);
+				// decrypt the header
+				int decryptLen = decryptCipher.update(encHeaderBuf.array(), encHeaderBuf.arrayOffset(),
+						encHeaderBuf.readableBytes(), headerBuf.array(), headerBuf.arrayOffset());
+				// set the writer index manually, otherwise netty will think there is nothing in
+				// the buffer
 				headerBuf.writerIndex(decryptLen);
 				System.out.println("Decrypted Header:\n" + ByteBufUtil.prettyHexDump(headerBuf));
 				int packetLength = headerBuf.readUnsignedShort();

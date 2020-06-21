@@ -27,7 +27,6 @@ import java.util.Arrays;
 import java.util.Random;
 
 import javax.crypto.Cipher;
-import javax.xml.bind.DatatypeConverter;
 
 import org.bouncycastle.util.BigIntegers;
 import org.slf4j.Logger;
@@ -81,7 +80,7 @@ public final class RealmVerifyHandler implements BasicRealmHandler {
 		System.out.println("Server ID: " + serverId);
 		System.out.println("Username: " + username);
 		System.out.println("Login Server Type: " + loginServerType);
-		System.out.println("Client Seed: " + clientSeed);
+		System.out.println("Client Seed: " + Arrays.toString(clientSeed));
 		System.out.println("Region: " + region);
 		System.out.println("Battle Group: " + battleGroup);
 		System.out.println("Realm Index: " + realmIndex);
@@ -99,7 +98,6 @@ public final class RealmVerifyHandler implements BasicRealmHandler {
 			return;
 		}
 		byte[] K_bytes = BigIntegers.asUnsignedByteArray(K);
-		System.out.println(DatatypeConverter.printHexBinary(K_bytes));
 		// Check the digest
 		MessageDigest md;
 		try {
