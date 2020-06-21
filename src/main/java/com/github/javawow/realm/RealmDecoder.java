@@ -51,7 +51,7 @@ public final class RealmDecoder extends ByteToMessageDecoder {
 		Cipher decryptCipher = ctx.channel().attr(DECRYPT_CIPHER_KEY).get();
 		if (decryptCipher == null) {
 			// Encryption has not started yet, read the packets plain
-			int packetLength = in.readShort();
+			int packetLength = in.readUnsignedShort();
 			System.out.println("Unencrypted Packet Length: " + packetLength);
 			if (in.readableBytes() < packetLength) {
 				// still not enough data
@@ -72,7 +72,7 @@ public final class RealmDecoder extends ByteToMessageDecoder {
 				int decryptLen = decryptCipher.update(encHeaderBuf.array(), 0, 6, headerBuf.array(), 0);
 				headerBuf.writerIndex(decryptLen);
 				System.out.println("Decrypted Header:\n" + ByteBufUtil.prettyHexDump(headerBuf));
-				int packetLength = headerBuf.readShort();
+				int packetLength = headerBuf.readUnsignedShort();
 				if (packetLength < 0 || packetLength > 10240) {
 					LOG.error("Invalid Packet Length: {}", packetLength);
 					ctx.close();

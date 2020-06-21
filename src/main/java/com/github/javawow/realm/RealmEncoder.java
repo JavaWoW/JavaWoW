@@ -23,6 +23,7 @@ import javax.crypto.Cipher;
 import com.github.javawow.tools.packet.ByteBufWoWPacket;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
@@ -68,6 +69,7 @@ public final class RealmEncoder extends MessageToByteEncoder<ByteBufWoWPacket> {
 				// Encryption is active, therefore the header must be encrypted
 				int headerSize = headerBuf.readableBytes();
 //				System.out.println("Header Size: " + headerSize);
+				System.out.println("Plain Header:\n" + ByteBufUtil.prettyHexDump(headerBuf));
 				ByteBuf encHeaderBuf = ctx.alloc().heapBuffer(headerSize, headerSize);
 				try {
 					headerBuf.readBytes(encHeaderBuf, 0, headerSize);

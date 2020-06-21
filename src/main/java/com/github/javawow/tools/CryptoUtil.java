@@ -28,6 +28,7 @@ import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.ShortBufferException;
 import javax.crypto.spec.SecretKeySpec;
+import javax.xml.bind.DatatypeConverter;
 
 import org.bouncycastle.util.BigIntegers;
 
@@ -102,6 +103,7 @@ public final class CryptoUtil {
 		} else {
 			key = decryptHMacSHA1(sessionKey);
 		}
+		System.out.println((encrypt ? "ENCRYPT" : "DECRYPT") + " RC4 Key: " + DatatypeConverter.printHexBinary(key));
 		// Create the RC4 cipher
 		Cipher cipher;
 		try {

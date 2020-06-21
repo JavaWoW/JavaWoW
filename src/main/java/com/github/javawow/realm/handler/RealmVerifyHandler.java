@@ -55,7 +55,7 @@ public final class RealmVerifyHandler implements BasicRealmHandler {
 
 	@Override
 	public final boolean hasValidState(Channel channel) {
-		return true; // XXX Any other ways?
+		return true; // TODO Testing only
 	}
 
 	@Override
@@ -121,7 +121,7 @@ public final class RealmVerifyHandler implements BasicRealmHandler {
 			channel.close();
 			return;
 		}
-		// TODO Initialize encryption (RC4)
+		// Initialize encryption (RC4)
 		Cipher clientDecryptCipher = CryptoUtil.createRC4Cipher(false, K);
 		Cipher serverEncryptCipher = CryptoUtil.createRC4Cipher(true, K);
 		// Set the ciphers for WoW packet encryption/decryption
