@@ -26,7 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
@@ -46,13 +45,11 @@ public final class RealmDecoder extends ByteToMessageDecoder {
 			// not enough data for a decode
 			return;
 		}
-		LOG.info("Received:\n{}", ByteBufUtil.prettyHexDump(in));
 		in.markReaderIndex();
 		Cipher decryptCipher = ctx.channel().attr(DECRYPT_CIPHER_KEY).get();
 		if (decryptCipher == null) {
 			// Encryption has not started yet, read the packets plain
 			int packetLength = in.readUnsignedShort();
-//			System.out.println("Unencrypted Packet Length: " + packetLength);
 			if (in.readableBytes() < packetLength) {
 				// still not enough data
 				in.resetReaderIndex();
@@ -75,14 +72,12 @@ public final class RealmDecoder extends ByteToMessageDecoder {
 				// set the writer index manually, otherwise netty will think there is nothing in
 				// the buffer
 				headerBuf.writerIndex(decryptLen);
-				System.out.println("Decrypted Header:\n" + ByteBufUtil.prettyHexDump(headerBuf));
 				int packetLength = headerBuf.readUnsignedShort();
 				if (packetLength < 0 || packetLength > 10240) {
 					LOG.error("Invalid Packet Length: {}", packetLength);
 					ctx.close();
 					return;
 				}
-				System.out.println("Determined packet length: " + packetLength);
 				if (in.readableBytes() < packetLength) {
 					// still not enough data
 					in.resetReaderIndex();
