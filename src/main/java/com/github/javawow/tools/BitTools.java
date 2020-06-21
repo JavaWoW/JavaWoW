@@ -62,6 +62,31 @@ public final class BitTools {
 	}
 
 	/**
+	 * Converts a {@link BigInteger} into a little-endian byte array, dropping the
+	 * extra sign byte if the number is positive.
+	 * 
+	 * @param bi The {@link BigInteger} to convert.
+	 * @return The byte array contents of the {@link BigInteger}
+	 */
+	public static final byte[] toLEByteArray(BigInteger bi) {
+		byte[] b = bi.toByteArray();
+		int newLength;
+		boolean ignoreMSB = false;
+		if (b[0] == 0) { // most significant byte (sign byte) is 0 (positive), we ignore the sign byte
+			// (if it exists)
+			newLength = b.length - 1;
+			ignoreMSB = true;
+		} else {
+			newLength = b.length;
+		}
+		byte[] ret = new byte[newLength];
+		for (int i = (b.length - 1), c = 0, end = ignoreMSB ? 1 : 0; i >= end; i--) {
+			ret[c++] = b[i];
+		}
+		return ret;
+	}
+
+	/**
 	 * Converts a {@link BigInteger} into a little-endian byte array of
 	 * {@code minSize} or greater, dropping the extra sign byte if the number is
 	 * positive.

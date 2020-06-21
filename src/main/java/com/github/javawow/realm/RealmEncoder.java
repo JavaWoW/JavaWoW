@@ -18,14 +18,19 @@
 
 package com.github.javawow.realm;
 
+import javax.crypto.Cipher;
+
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
+import io.netty.util.AttributeKey;
 
 @Sharable
-final class RealmEncoder extends MessageToByteEncoder<byte[]> {
+public final class RealmEncoder extends MessageToByteEncoder<byte[]> {
 	private static final RealmEncoder INSTANCE = new RealmEncoder();
+	public static final AttributeKey<Cipher> ENCRYPT_CIPHER_KEY = AttributeKey.newInstance("RC4_CIPHER_ENCRYPT");
 
 	private RealmEncoder() {
 		// singleton
@@ -37,7 +42,17 @@ final class RealmEncoder extends MessageToByteEncoder<byte[]> {
 
 	@Override
 	protected void encode(ChannelHandlerContext ctx, byte[] msg, ByteBuf out) throws Exception {
-		out.writeShort(msg.length);
-		out.writeBytes(msg);
+		Cipher encryptCipher = ctx.channel().attr(ENCRYPT_CIPHER_KEY).get();
+		if (encryptCipher == null) {
+			// Encryption has not started yet, write the packets plain
+			out.writeShort(msg.length);
+			out.writeBytes(msg);
+		} else {
+			// Encryption is active, therefore the header must be encrypted
+			ByteBuf encHeaderBuf = Unpooled.buffer(2, 3);
+			encryptCipher.doFinal(msg, 0, 2, encHeaderBuf.array(), 0);
+			out.writeBytes(encHeaderBuf);
+			out.writeBytes(msg, 2, msg.length - 2);
+		}
 	}
 }

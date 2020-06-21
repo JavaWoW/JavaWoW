@@ -18,13 +18,21 @@
 
 package com.github.javawow.realm.handler;
 
+import java.io.IOException;
+import java.math.BigInteger;
 import java.util.Arrays;
+
+import javax.crypto.Cipher;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.javawow.data.input.SeekableLittleEndianAccessor;
 import com.github.javawow.data.output.LittleEndianWriterStream;
+import com.github.javawow.realm.RealmDecoder;
+import com.github.javawow.realm.RealmEncoder;
+import com.github.javawow.tools.CryptoUtil;
+import com.github.javawow.tools.FileUtil;
 
 import io.netty.channel.Channel;
 
@@ -68,7 +76,22 @@ public final class RealmVerifyHandler implements BasicRealmHandler {
 		System.out.println("DosResponse: " + dosResponse);
 		System.out.println("Digest: " + Arrays.toString(digest));
 		LOGGER.info(slea.toString());
-		// TODO Initialize encryption
+		// Read session key from the DB
+		BigInteger K;
+		try {
+			K = FileUtil.getSessionKey();
+		} catch (IOException e) {
+			LOGGER.error(e.getLocalizedMessage(), e);
+			channel.close();
+			return;
+		}
+		// TODO Initialize encryption (RC4)
+		Cipher clientDecryptCipher = CryptoUtil.createRC4Cipher(true, K);
+		Cipher serverEncryptCipher = CryptoUtil.createRC4Cipher(false, K);
+		// Set the ciphers for WoW packet encryption/decryption
+		channel.attr(RealmDecoder.DECRYPT_CIPHER_KEY).set(clientDecryptCipher);
+		channel.attr(RealmEncoder.ENCRYPT_CIPHER_KEY).set(serverEncryptCipher);
+		
 		boolean error = true;
 		if (error) {
 			LittleEndianWriterStream lews = new LittleEndianWriterStream();
@@ -82,7 +105,8 @@ public final class RealmVerifyHandler implements BasicRealmHandler {
 			lews.writeInt(0); // BillingTimeRemaining
 			lews.write(0); // BillingPlanFlags
 			lews.writeInt(0); // BillingTimeRested
-			lews.write(2); // 0 - normal, 1 - TBC, 2 - WOTLK, must be set in database manually for each account
+			lews.write(2); // 0 - normal, 1 - TBC, 2 - WOTLK, must be set in database manually for each
+							// account
 			// queue information
 			lews.writeInt(1); // Queue position
 			lews.write(0); // Realm has a free character migration - bool

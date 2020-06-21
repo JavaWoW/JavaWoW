@@ -18,6 +18,7 @@
 
 package com.github.javawow.auth.handler;
 
+import java.io.IOException;
 import java.math.BigInteger;
 
 import org.bouncycastle.crypto.CryptoException;
@@ -27,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import com.github.javawow.auth.AuthServer;
 import com.github.javawow.auth.AuthState;
 import com.github.javawow.auth.message.LoginProofMessage;
+import com.github.javawow.tools.FileUtil;
 import com.github.javawow.tools.packet.AuthPacketFactory;
 import com.github.javawow.tools.srp.WoWSRP6Server;
 
@@ -85,6 +87,16 @@ public final class LoginVerifyHandler implements BasicAuthHandler<LoginProofMess
 		try {
 			M2 = srp.calculateServerEvidenceMessage();
 		} catch (CryptoException e) {
+			LOGGER.error(e.getLocalizedMessage(), e);
+			channel.close();
+			return;
+		}
+		// Store K (session key) in the database
+		BigInteger K;
+		try {
+			K = srp.calculateSessionKey();
+			FileUtil.saveSessionKey(K);
+		} catch (CryptoException | IOException e) {
 			LOGGER.error(e.getLocalizedMessage(), e);
 			channel.close();
 			return;

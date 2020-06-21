@@ -18,6 +18,7 @@
 
 package com.github.javawow.auth.handler;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 
@@ -28,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import com.github.javawow.auth.AuthServer;
 import com.github.javawow.auth.message.LoginRequestMessage;
+import com.github.javawow.tools.FileUtil;
 import com.github.javawow.tools.RandomUtil;
 import com.github.javawow.tools.packet.AuthPacketFactory;
 import com.github.javawow.tools.srp.WoWSRP6Server;
@@ -76,7 +78,11 @@ public final class LoginRequestHandler implements BasicAuthHandler<LoginRequestM
 		gen.init(params, new SHA1Digest());
 		BigInteger v = gen.generateVerifier(s, I, p); // generate v
 		// Store v (verifier) and s (salt) in the database
-		
+//		try {
+//			FileUtil.saveVS(v, s);
+//		} catch (IOException e) {
+//			LOGGER.error(e.getLocalizedMessage(), e);
+//		}
 		WoWSRP6Server srp = WoWSRP6Server.init(params, v, I, s, new SHA1Digest(), RandomUtil.getSecureRandom());
 		BigInteger B = srp.generateServerCredentials(); // generate B
 		// Set client values

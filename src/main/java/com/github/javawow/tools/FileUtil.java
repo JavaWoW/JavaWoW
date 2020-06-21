@@ -71,4 +71,24 @@ public final class FileUtil {
 			fos.getFD().sync();
 		}
 	}
+
+	/**
+	 * Saves the verifier and salt to a temporary file (for testing only).
+	 * 
+	 * @param v The verifier to save
+	 * @param s The salt to save
+	 * @throws IOException If an error occurs while saving the files
+	 */
+	public static final void saveVS(BigInteger v, byte[] s) throws IOException {
+		try (FileOutputStream fos = new FileOutputStream("v.tmp");) {
+			fos.write(BigIntegers.asUnsignedByteArray(v));
+			fos.flush();
+			fos.getFD().sync();
+		}
+		try (FileOutputStream fos = new FileOutputStream("s.tmp");) {
+			fos.write(s);
+			fos.flush();
+			fos.getFD().sync();
+		}
+	}
 }

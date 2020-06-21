@@ -45,7 +45,7 @@ final class RealmServerHandler extends ChannelInboundHandlerAdapter {
 	private static final Map<Short, BasicRealmHandler> handlers = new HashMap<>();
 
 	static {
-		handlers.put((short) 0x1ED, RealmVerifyHandler.getInstance());
+		handlers.put((short) 0x1ED, RealmVerifyHandler.getInstance()); // CMSG_AUTH_SESSION
 	}
 
 	private RealmServerHandler() {

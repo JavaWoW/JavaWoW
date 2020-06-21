@@ -20,38 +20,72 @@ package com.github.javawow.realm;
 
 import java.util.List;
 
+import javax.crypto.Cipher;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
+import io.netty.util.AttributeKey;
 
-final class RealmDecoder extends ByteToMessageDecoder {
+public final class RealmDecoder extends ByteToMessageDecoder {
 	private static final Logger LOG = LoggerFactory.getLogger(RealmDecoder.class);
+	public static final AttributeKey<Cipher> DECRYPT_CIPHER_KEY = AttributeKey.newInstance("RC4_CIPHER_DECRYPT");
 
 	RealmDecoder() {
 		// keep it package-private
 	}
 
 	@Override
-	protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-		if (in.readableBytes() < 2) {
+	protected final void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
+		if (in.readableBytes() < 6) {
 			// not enough data for a decode
 			return;
 		}
-		LOG.info("Received:\n{}", ByteBufUtil.prettyHexDump(in));
+//		LOG.info("Received:\n{}", ByteBufUtil.prettyHexDump(in));
 		in.markReaderIndex();
-		int packetLength = in.readShort();
-		if (in.readableBytes() < packetLength) {
-			// still not enough data
-			in.resetReaderIndex();
-			return;
+		Cipher decryptCipher = ctx.channel().attr(DECRYPT_CIPHER_KEY).get();
+		if (decryptCipher == null) {
+			// Encryption has not started yet, read the packets plain
+			int packetLength = in.readShort();
+			if (in.readableBytes() < packetLength) {
+				// still not enough data
+				in.resetReaderIndex();
+				return;
+			}
+//			ByteBuf buf = ctx.alloc().buffer(packetLength, packetLength);
+			ByteBuf buf = Unpooled.buffer(packetLength, packetLength);
+			in.readBytes(buf, packetLength);
+			out.add(buf);
+		} else {
+			// Encryption is active, therefore the header is encrypted
+			// header length: packet size (2 bytes) + opcode (4 bytes)
+			ByteBuf encHeaderBuf = Unpooled.buffer(6, 6); // buffer to hold the encrypted header
+			ByteBuf headerBuf = Unpooled.buffer(6, 6); // buffer to hold the decrypted header
+			try {
+				int decryptLen = decryptCipher.doFinal(encHeaderBuf.array(), 0, 6, headerBuf.array(), 0);
+				headerBuf.writerIndex(decryptLen);
+				int packetLength = headerBuf.readShortLE();
+				System.out.println("Determined packet length: " + packetLength);
+				if (in.readableBytes() < packetLength) {
+					// still not enough data
+					in.resetReaderIndex();
+					return;
+				}
+				int opcode = headerBuf.readIntLE();
+//				ByteBuf buf = ctx.alloc().buffer(packetLength, packetLength);
+				ByteBuf buf = Unpooled.buffer(packetLength, packetLength);
+				buf.writeIntLE(opcode);
+				in.readBytes(buf, packetLength - 4);
+				out.add(buf);
+			} finally {
+				// release the buffers we just created
+				encHeaderBuf.release();
+				headerBuf.release();
+			}
 		}
-		ByteBuf buf = Unpooled.buffer(packetLength, packetLength);
-		in.readBytes(buf, packetLength);
-		out.add(buf);
 	}
 }
