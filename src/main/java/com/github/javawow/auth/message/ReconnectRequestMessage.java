@@ -18,7 +18,10 @@
 
 package com.github.javawow.auth.message;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+
+import org.bouncycastle.util.Arrays;
 
 import com.google.errorprone.annotations.Immutable;
 
@@ -32,17 +35,17 @@ import com.google.errorprone.annotations.Immutable;
 public final class ReconnectRequestMessage {
 	private final byte error;
 	private final short size;
-	private final byte[] gamename; // length 4
+	private final String gamename;
 	private final byte majorVersion;
 	private final byte minorVersion;
 	private final byte patchVersion;
 	private final short build;
-	private final byte[] arch; // length 4
-	private final byte[] os; // length 4
-	private final byte[] locale; // length 4
+	private final String arch;
+	private final String os;
+	private final String locale;
 	private final int timezone;
 	private final int ip;
-	private final byte iLength;
+	@SuppressWarnings("Immutable")
 	private final byte[] i;
 
 	public ReconnectRequestMessage(byte error, short size, byte[] gamename, byte majorVersion, byte minorVersion,
@@ -70,17 +73,16 @@ public final class ReconnectRequestMessage {
 		}
 		this.error = error;
 		this.size = size;
-		this.gamename = gamename;
+		this.gamename = new String(gamename, 0, gamename.length - 1, StandardCharsets.US_ASCII);
 		this.majorVersion = majorVersion;
 		this.minorVersion = minorVersion;
 		this.patchVersion = patchVersion;
 		this.build = build;
-		this.arch = arch;
-		this.os = os;
-		this.locale = locale;
+		this.arch = new String(arch, 0, arch.length - 1, StandardCharsets.US_ASCII);
+		this.os = new String(os, 0, os.length - 1, StandardCharsets.US_ASCII);
+		this.locale = new String(locale, StandardCharsets.US_ASCII);
 		this.timezone = timezone;
 		this.ip = ip;
-		this.iLength = iLength;
 		this.i = i;
 	}
 
@@ -92,7 +94,7 @@ public final class ReconnectRequestMessage {
 		return size;
 	}
 
-	public final byte[] getGamename() {
+	public final String getGamename() {
 		return gamename;
 	}
 
@@ -112,15 +114,15 @@ public final class ReconnectRequestMessage {
 		return build;
 	}
 
-	public final byte[] getArch() {
+	public final String getArch() {
 		return arch;
 	}
 
-	public final byte[] getOs() {
+	public final String getOs() {
 		return os;
 	}
 
-	public final byte[] getLocale() {
+	public final String getLocale() {
 		return locale;
 	}
 
@@ -132,11 +134,7 @@ public final class ReconnectRequestMessage {
 		return ip;
 	}
 
-	public final byte getILength() {
-		return iLength;
-	}
-
 	public final byte[] getI() {
-		return i;
+		return Arrays.copyOf(i, i.length);
 	}
 }

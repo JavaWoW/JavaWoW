@@ -41,7 +41,6 @@ public final class FileUtil {
 	/**
 	 * Fetches the session key from a temporary file (for testing only).
 	 * 
-	 * @param K The session key to save
 	 * @throws IOException If an error occurs while accessing the file
 	 */
 	public static final BigInteger getSessionKey() throws IOException {

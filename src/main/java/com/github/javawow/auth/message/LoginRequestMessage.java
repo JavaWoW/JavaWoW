@@ -21,6 +21,8 @@ package com.github.javawow.auth.message;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
+import org.bouncycastle.util.Arrays;
+
 import com.google.errorprone.annotations.Immutable;
 
 /**
@@ -43,7 +45,7 @@ public final class LoginRequestMessage {
 	private final String locale;
 	private final int timezone;
 	private final int ip;
-	private final byte iLength;
+	@SuppressWarnings("Immutable")
 	private final byte[] i;
 
 	public LoginRequestMessage(byte error, short size, byte[] gamename, byte majorVersion, byte minorVersion,
@@ -81,7 +83,6 @@ public final class LoginRequestMessage {
 		this.locale = new String(locale, StandardCharsets.US_ASCII);
 		this.timezone = timezone;
 		this.ip = ip;
-		this.iLength = iLength;
 		this.i = i;
 	}
 
@@ -133,11 +134,7 @@ public final class LoginRequestMessage {
 		return ip;
 	}
 
-	public final byte getILength() {
-		return iLength;
-	}
-
 	public final byte[] getI() {
-		return i;
+		return Arrays.copyOf(i, i.length);
 	}
 }

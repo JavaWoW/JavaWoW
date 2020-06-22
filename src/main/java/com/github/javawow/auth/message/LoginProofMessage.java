@@ -35,6 +35,7 @@ import com.google.errorprone.annotations.Immutable;
 public final class LoginProofMessage {
 	private final BigInteger a;
 	private final BigInteger m1;
+	@SuppressWarnings("Immutable")
 	private final byte[] crcHash; // length 20
 	private final byte numKeys; // number of keys
 	private final byte securityFlags;

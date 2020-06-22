@@ -20,6 +20,8 @@ package com.github.javawow.auth.message;
 
 import java.util.Objects;
 
+import org.bouncycastle.util.Arrays;
+
 import com.google.errorprone.annotations.Immutable;
 
 /**
@@ -30,8 +32,11 @@ import com.google.errorprone.annotations.Immutable;
  */
 @Immutable
 public final class ReconnectProofMessage {
+	@SuppressWarnings("Immutable")
 	private final byte[] R1;
+	@SuppressWarnings("Immutable")
 	private final byte[] R2;
+	@SuppressWarnings("Immutable")
 	private final byte[] R3;
 	private final byte numKeys; // number of keys
 
@@ -48,22 +53,22 @@ public final class ReconnectProofMessage {
 		if (r3.length != 20) {
 			throw new IllegalArgumentException("r3 must be length 20");
 		}
-		this.R1 = r1;
-		this.R2 = r2;
-		this.R3 = r3;
+		this.R1 = Arrays.copyOf(r1, 16);
+		this.R2 = Arrays.copyOf(r2, 16);
+		this.R3 = Arrays.copyOf(r3, 16);
 		this.numKeys = numKeys;
 	}
 
 	public final byte[] getR1() {
-		return R1;
+		return Arrays.copyOf(R1, R1.length);
 	}
 
 	public final byte[] getR2() {
-		return R2;
+		return Arrays.copyOf(R2, R2.length);
 	}
 
 	public final byte[] getR3() {
-		return R3;
+		return Arrays.copyOf(R3, R3.length);
 	}
 
 	public final byte getNumKeys() {

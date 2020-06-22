@@ -18,8 +18,6 @@
 
 package com.github.javawow.auth.handler;
 
-import java.nio.charset.StandardCharsets;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,9 +47,9 @@ public final class ReconnectRequestHandler implements BasicAuthHandler<Reconnect
 
 	@Override
 	public final void handleMessage(Channel channel, ReconnectRequestMessage msg) {
-		String arch = new String(msg.getArch(), StandardCharsets.US_ASCII);
-		String os = new String(msg.getOs(), StandardCharsets.US_ASCII);
-		String locale = new String(msg.getLocale(), StandardCharsets.US_ASCII);
+		String arch = msg.getArch();
+		String os = msg.getOs();
+		String locale = msg.getLocale();
 		LOGGER.info("Arch: {} OS: {} Locale: {}", arch, os, locale);
 //		int timezone = msg.getTimezone();
 //		int ip = msg.getIp();

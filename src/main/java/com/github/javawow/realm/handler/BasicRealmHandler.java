@@ -36,7 +36,7 @@ public interface BasicRealmHandler {
 	 * called.
 	 * 
 	 * @param channel The channel executing this handler.
-	 * @param msg     The message from the client
+	 * @param slea    The message from the client
 	 */
 	void handlePacket(Channel channel, SeekableLittleEndianAccessor slea);
 }
